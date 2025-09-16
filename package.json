@@ -29,7 +29,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@prisma/client": "^6.12.0",
+    "@prisma/client": "^6.16.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/multer": "^2.0.0",
     "bcryptjs": "^2.4.3",
