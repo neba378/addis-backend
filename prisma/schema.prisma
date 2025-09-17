@@ -91,3 +91,68 @@ enum RequestStatus {
   COMPLETED
   CANCELLED
 }
+
+model Client {
+  id               Int       @id @default(autoincrement())
+  fullName         String
+  caseNumber       String    @default("N/A")
+  status           String    @default("Pending")
+  phoneNumber      String
+  appointmentDate  DateTime?
+  assignedLawyer   String?
+  court            String?
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  folders Folder[]
+  notes   Note[]
+
+  @@map("clients")
+}
+
+model Folder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String   @default("custom") // 'default' or 'custom'
+  clientId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  files  File[]
+
+  @@map("folders")
+}
+
+model File {
+  id          Int      @id @default(autoincrement())
+  fileName    String
+  description String?
+  filePath    String
+  fileSize    Int?     // in bytes
+  mimeType    String?
+  folderId    Int
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  @@map("files")
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  clientId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
