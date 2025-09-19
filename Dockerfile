@@ -1,23 +1,24 @@
-# Use Node.js LTS as base image
-FROM node:20
+FROM node:20-alpine
 
-# Set working directory
+# Create app directory
 WORKDIR /app
 
-# Copy package.json and lock file first (for caching)
+# Copy dependencies
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy rest of the project files
+# Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma Client
 RUN npx prisma generate
 
-# Expose the app port
+RUN npx prisma generate && npm run build
+
+# Expose port
 EXPOSE 3001
 
-# Start the server
-CMD ["npm", "run", "dev"]
+# Default command (migrations + start)
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]

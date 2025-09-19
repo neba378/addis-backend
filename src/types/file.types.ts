@@ -1,6 +1,8 @@
+import { File, Folder, Client } from "@prisma/client";
+
 export interface CreateFileData {
   fileName: string;
-  description?: string;
+  description?: string | undefined;
   filePath: string;
   fileSize: number;
   mimeType: string;
@@ -9,29 +11,14 @@ export interface CreateFileData {
 
 export interface UpdateFileData {
   fileName?: string;
-  description?: string;
+  description?: string | null;
 }
 
-export interface FileWithFolder {
-  id: number;
-  fileName: string;
-  description: string | null;
-  filePath: string;
-  fileSize: number | null;
-  mimeType: string | null;
-  folderId: number;
-  uploadedAt: Date;
-  updatedAt: Date;
-  folder: {
-    id: number;
-    name: string;
-    client: {
-      id: number;
-      fullName: string;
-      caseNumber: string;
-    };
+export type FileWithFolder = File & {
+  folder: Folder & {
+    client: Pick<Client, "id" | "fullName" | "caseNumber">;
   };
-}
+};
 
 export interface FileUploadResult {
   originalname: string;

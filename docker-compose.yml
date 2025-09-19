@@ -35,7 +35,11 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && npm run dev"
-
+    command: >
+      sh -c "
+      npx prisma generate &&
+      npx prisma migrate deploy &&
+      npm run dev
+      "
 volumes:
   mysql_data:

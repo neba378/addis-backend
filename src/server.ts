@@ -5,9 +5,9 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Import your new routes (to be created)
-// import clientRoutes from "./routes/clientRoutes";
-// import folderRoutes from "./routes/folderRoutes";
-// import fileRoutes from "./routes/fileRoutes";
+import clientRoutes from "./routes/clientRoutes";
+import folderRoutes from "./routes/folderRoutes";
+import fileRoutes from "./routes/fileRoutes";
 import noteRoutes from "./routes/noteRoutes";
 import authRoutes from "./modules/auth/routes/auth.routes";
 
@@ -27,7 +27,11 @@ app.use(helmet());
 app.use(
   cors({
     origin: isProduction()
-      ? ["https://yourdomain.com"] // Replace with your production domain
+      ? [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "http://localhost:5173",
+        ] // Replace with your production domain
       : [
           "http://localhost:3000",
           "http://localhost:3001",
@@ -52,7 +56,7 @@ app.use(
   (req, res, next) => {
     // More restrictive in production
     if (isProduction()) {
-      res.header("Access-Control-Allow-Origin", "https://yourdomain.com");
+      res.header("Access-Control-Allow-Origin", "http://localhost:3000");
     } else {
       res.header("Access-Control-Allow-Origin", "*");
     }
@@ -85,9 +89,9 @@ app.get("/health", async (_req, res) => {
 });
 
 // API routes for your office management system
-// app.use("/api/clients", clientRoutes);
-// app.use("/api/folders", folderRoutes);
-// app.use("/api/files", fileRoutes);
+app.use("/api/clients", clientRoutes);
+app.use("/api/folders", folderRoutes);
+app.use("/api/files", fileRoutes);
 app.use("/api/notes", noteRoutes);
 
 // Keep your existing routes if needed, or remove them

@@ -1,27 +1,30 @@
-import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import { prisma } from '../../prisma/client';
-import { 
+import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import { prisma } from "../../prisma/client";
+import {
   AdminRegisterDto,
   AdminResponse,
-  AdminRegisterResponse 
-} from '../../types/admin';
-import { adminRegisterSchema } from '../../validations/admin';
+  AdminRegisterResponse,
+} from "../../types/admin";
+import { adminRegisterSchema } from "../../validations/admin";
 
 export class AdminController {
   /**
    * Register a new admin
    */
-  static async register(req: Request<{}, {}, AdminRegisterDto>, res: Response): Promise<void> {
+  static async register(
+    req: Request<{}, {}, AdminRegisterDto>,
+    res: Response
+  ): Promise<void> {
     try {
       // Validate input using Zod
       const validationResult = adminRegisterSchema.safeParse(req.body);
-      
+
       if (!validationResult.success) {
         res.status(400).json({
-          error: 'Validation error',
-          message: 'Invalid input data',  
-          details: validationResult.error.issues
+          error: "Validation error",
+          message: "Invalid input data",
+          details: validationResult.error.issues,
         });
         return;
       }
@@ -35,8 +38,8 @@ export class AdminController {
 
       if (existingAdmin) {
         res.status(409).json({
-          error: 'Conflict',
-          message: 'Admin with this email already exists'
+          error: "Conflict",
+          message: "Admin with this email already exists",
         });
         return;
       }
@@ -66,15 +69,15 @@ export class AdminController {
 
       const response: AdminRegisterResponse = {
         admin: adminResponse,
-        message: 'Admin registered successfully'
+        message: "Admin registered successfully",
       };
 
       res.status(201).json(response);
     } catch (error) {
-      console.error('Error registering admin:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to register admin' 
+      console.error("Error registering admin:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to register admin",
       });
     }
   }
@@ -82,25 +85,33 @@ export class AdminController {
   /**
    * Get all admins with pagination and search
    */
-  static async getAdmins(req: Request<{}, {}, {}, { page?: string; limit?: string; search?: string; isActive?: string }>, res: Response): Promise<void> {
+  static async getAdmins(
+    req: Request<
+      {},
+      {},
+      {},
+      { page?: string; limit?: string; search?: string; isActive?: string }
+    >,
+    res: Response
+  ): Promise<void> {
     try {
-      const { page = '1', limit = '10', search = '', isActive } = req.query;
+      const { page = "1", limit = "10", search = "", isActive } = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
       const skip = (pageNum - 1) * limitNum;
 
       // Build where clause
       const where: any = {};
-      
+
       if (search) {
         where.OR = [
-          { fullName: { contains: search, mode: 'insensitive' as any } },
-          { email: { contains: search, mode: 'insensitive' as any } },
+          { fullName: { contains: search as any } },
+          { email: { contains: search as any } },
         ];
       }
 
       if (isActive !== undefined) {
-        where.isActive = isActive === 'true';
+        where.isActive = isActive === "true";
       }
 
       // Get admins and total count
@@ -109,7 +120,7 @@ export class AdminController {
           where,
           skip,
           take: limitNum,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
           select: {
             id: true,
             fullName: true,
@@ -129,10 +140,10 @@ export class AdminController {
         limit: limitNum,
       });
     } catch (error) {
-      console.error('Error fetching admins:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to fetch admins' 
+      console.error("Error fetching admins:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to fetch admins",
       });
     }
   }
@@ -140,7 +151,10 @@ export class AdminController {
   /**
    * Get a single admin by ID
    */
-  static async getAdminById(req: Request<{ id: string }>, res: Response): Promise<void> {
+  static async getAdminById(
+    req: Request<{ id: string }>,
+    res: Response
+  ): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -157,20 +171,20 @@ export class AdminController {
       });
 
       if (!admin) {
-        res.status(404).json({ 
-          error: 'Not found',
-          message: 'Admin not found' 
+        res.status(404).json({
+          error: "Not found",
+          message: "Admin not found",
         });
         return;
       }
 
       res.status(200).json(admin);
     } catch (error) {
-      console.error('Error fetching admin:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to fetch admin' 
+      console.error("Error fetching admin:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to fetch admin",
       });
     }
   }
-} 
+}

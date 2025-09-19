@@ -21,7 +21,7 @@ export const validate =
 
         return errorResponse(
           res,
-          "Validation failed",
+          "Validation failnd",
           400,
           errorMessages.map((e) => `${e.path}: ${e.message}`).join(", ")
         );

@@ -38,10 +38,12 @@ export const noteController = {
     try {
       const { page, limit, sortBy, sortOrder } =
         req.query as unknown as PaginationInput;
+      const numericPage = page ? Number(page) : 1;
+      const numericLimit = limit ? Number(limit) : 10;
 
       const result = await noteService.getAllNotes({
-        page,
-        limit,
+        page: numericPage,
+        limit: numericLimit,
         sortBy,
         sortOrder,
       });
@@ -62,10 +64,12 @@ export const noteController = {
     try {
       const { q, page, limit, sortBy, sortOrder } =
         req.query as unknown as NoteSearchInput;
+      const numericPage = page ? Number(page) : 1;
+      const numericLimit = limit ? Number(limit) : 10;
 
       const result = await noteService.searchAllNotes(q, {
-        page,
-        limit,
+        page: numericPage,
+        limit: numericLimit,
         sortBy,
         sortOrder,
       });
@@ -87,10 +91,12 @@ export const noteController = {
       const { clientId } = req.params as unknown as ClientIdParams;
       const { page, limit, sortBy, sortOrder } =
         req.query as unknown as PaginationInput;
+      const numericPage = page ? Number(page) : 1;
+      const numericLimit = limit ? Number(limit) : 10;
 
-      const result = await noteService.getNotesByClientId(clientId, {
-        page,
-        limit,
+      const result = await noteService.getNotesByClientId(Number(clientId), {
+        page: numericPage,
+        limit: numericLimit,
         sortBy,
         sortOrder,
       });
@@ -114,7 +120,7 @@ export const noteController = {
     try {
       const { id } = req.params as unknown as NoteIdParams;
 
-      const note = await noteService.getNoteById(id);
+      const note = await noteService.getNoteById(Number(id));
       successResponse(res, note, "Note retrieved successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -134,7 +140,7 @@ export const noteController = {
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;
 
-      const note = await noteService.updateNote(id, updateData);
+      const note = await noteService.updateNote(Number(id), updateData);
       successResponse(res, note, "Note updated successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -149,7 +155,7 @@ export const noteController = {
     try {
       const { id } = req.params as unknown as NoteIdParams;
 
-      await noteService.deleteNote(id);
+      await noteService.deleteNote(Number(id));
       successResponse(res, null, "Note deleted successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -165,10 +171,12 @@ export const noteController = {
       const { clientId } = req.params as unknown as ClientIdParams;
       const { q, page, limit, sortBy, sortOrder } =
         req.query as unknown as NoteSearchInput;
+      const numericPage = page ? Number(page) : 1;
+      const numericLimit = limit ? Number(limit) : 10;
 
-      const result = await noteService.searchNotes(clientId, q, {
-        page,
-        limit,
+      const result = await noteService.searchNotes(Number(clientId), q, {
+        page: numericPage,
+        limit: numericLimit,
         sortBy,
         sortOrder,
       });

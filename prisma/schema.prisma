@@ -95,7 +95,7 @@ enum RequestStatus {
 model Client {
   id               Int       @id @default(autoincrement())
   fullName         String
-  caseNumber       String    @default("N/A")
+  caseNumber       String    @unique @default("N/A")
   status           String    @default("Pending")
   phoneNumber      String
   appointmentDate  DateTime?
