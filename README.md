@@ -155,7 +155,7 @@ npm run prisma:studio    # Open Prisma Studio
 | Variable       | Description                | Default     |
 | -------------- | -------------------------- | ----------- |
 | `DATABASE_URL` | Database connection string | -           |
-| `DB_HOST`      | Database host              | localhost   |
+| `DB_HOST`      | Database host              | mysql       |
 | `DB_PORT`      | Database port              | 3306        |
 | `DB_USERNAME`  | Database username          | root        |
 | `DB_PASSWORD`  | Database password          | password    |

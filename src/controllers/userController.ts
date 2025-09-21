@@ -1,19 +1,22 @@
-import { Request, Response } from 'express';
-import { prisma } from '../prisma/client';
-import { 
-  CreateUserDto, 
-  UpdateUserDto, 
+import { Request, Response } from "express";
+import { prisma } from "../prisma/client";
+import {
+  CreateUserDto,
+  UpdateUserDto,
   UsersListResponse,
-  GetUsersQuery 
-} from '../types/user';
+  GetUsersQuery,
+} from "../types/user";
 
 export class UserController {
   /**
    * Get all users with pagination and search
    */
-  static async getUsers(req: Request<{}, {}, {}, GetUsersQuery>, res: Response): Promise<void> {
+  static async getUsers(
+    req: Request<{}, {}, {}, GetUsersQuery>,
+    res: Response
+  ): Promise<void> {
     try {
-      const { page = '1', limit = '10', search = '' } = req.query;
+      const { page = "1", limit = "10", search = "" } = req.query;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
       const skip = (pageNum - 1) * limitNum;
@@ -22,8 +25,8 @@ export class UserController {
       const where = search
         ? {
             OR: [
-              { name: { contains: search, mode: 'insensitive' as any } },
-              { email: { contains: search, mode: 'insensitive' as any } },
+              { name: { contains: search as any } },
+              { email: { contains: search as any } },
             ],
           }
         : {};
@@ -34,7 +37,7 @@ export class UserController {
           where,
           skip,
           take: limitNum,
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: "desc" },
         }),
         prisma.user.count({ where }),
       ]);
@@ -48,10 +51,10 @@ export class UserController {
 
       res.status(200).json(response);
     } catch (error) {
-      console.error('Error fetching users:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to fetch users' 
+      console.error("Error fetching users:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to fetch users",
       });
     }
   }
@@ -59,7 +62,10 @@ export class UserController {
   /**
    * Get a single user by ID
    */
-  static async getUserById(req: Request<{ id: string }>, res: Response): Promise<void> {
+  static async getUserById(
+    req: Request<{ id: string }>,
+    res: Response
+  ): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -68,19 +74,19 @@ export class UserController {
       });
 
       if (!user) {
-        res.status(404).json({ 
-          error: 'Not found',
-          message: 'User not found' 
+        res.status(404).json({
+          error: "Not found",
+          message: "User not found",
         });
         return;
       }
 
       res.status(200).json(user);
     } catch (error) {
-      console.error('Error fetching user:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to fetch user' 
+      console.error("Error fetching user:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to fetch user",
       });
     }
   }
@@ -88,15 +94,18 @@ export class UserController {
   /**
    * Create a new user
    */
-  static async createUser(req: Request<{}, {}, CreateUserDto>, res: Response): Promise<void> {
+  static async createUser(
+    req: Request<{}, {}, CreateUserDto>,
+    res: Response
+  ): Promise<void> {
     try {
       const { name, email } = req.body;
 
       // Validate required fields
       if (!name || !email) {
         res.status(400).json({
-          error: 'Bad request',
-          message: 'Name and email are required'
+          error: "Bad request",
+          message: "Name and email are required",
         });
         return;
       }
@@ -108,8 +117,8 @@ export class UserController {
 
       if (existingUser) {
         res.status(409).json({
-          error: 'Conflict',
-          message: 'User with this email already exists'
+          error: "Conflict",
+          message: "User with this email already exists",
         });
         return;
       }
@@ -123,10 +132,10 @@ export class UserController {
 
       res.status(201).json(user);
     } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to create user' 
+      console.error("Error creating user:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to create user",
       });
     }
   }
@@ -134,7 +143,10 @@ export class UserController {
   /**
    * Update a user by ID
    */
-  static async updateUser(req: Request<{ id: string }, {}, UpdateUserDto>, res: Response): Promise<void> {
+  static async updateUser(
+    req: Request<{ id: string }, {}, UpdateUserDto>,
+    res: Response
+  ): Promise<void> {
     try {
       const { id } = req.params;
       const updateData = req.body;
@@ -146,8 +158,8 @@ export class UserController {
 
       if (!existingUser) {
         res.status(404).json({
-          error: 'Not found',
-          message: 'User not found'
+          error: "Not found",
+          message: "User not found",
         });
         return;
       }
@@ -160,8 +172,8 @@ export class UserController {
 
         if (emailExists) {
           res.status(409).json({
-            error: 'Conflict',
-            message: 'User with this email already exists'
+            error: "Conflict",
+            message: "User with this email already exists",
           });
           return;
         }
@@ -174,10 +186,10 @@ export class UserController {
 
       res.status(200).json(user);
     } catch (error) {
-      console.error('Error updating user:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to update user' 
+      console.error("Error updating user:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to update user",
       });
     }
   }
@@ -185,7 +197,10 @@ export class UserController {
   /**
    * Delete a user by ID
    */
-  static async deleteUser(req: Request<{ id: string }>, res: Response): Promise<void> {
+  static async deleteUser(
+    req: Request<{ id: string }>,
+    res: Response
+  ): Promise<void> {
     try {
       const { id } = req.params;
 
@@ -196,8 +211,8 @@ export class UserController {
 
       if (!existingUser) {
         res.status(404).json({
-          error: 'Not found',
-          message: 'User not found'
+          error: "Not found",
+          message: "User not found",
         });
         return;
       }
@@ -208,11 +223,11 @@ export class UserController {
 
       res.status(204).send();
     } catch (error) {
-      console.error('Error deleting user:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to delete user' 
+      console.error("Error deleting user:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to delete user",
       });
     }
   }
-} 
+}

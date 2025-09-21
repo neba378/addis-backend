@@ -16,7 +16,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:integration": "jest --testPathPattern=integration",
-    "test:unit": "jest --testPathPattern=controllers|validations"
+    "test:unit": "jest --testPathPattern=controllers|validations",
+    "docs:serve": "swagger-ui-watcher swagger.json",
+    "docs:generate": "swagger-jsdoc -d src/config/swagger.ts -o swagger.json"
   },
   "keywords": [
     "nodejs",
@@ -31,7 +33,6 @@
   "dependencies": {
     "@prisma/client": "^6.16.0",
     "@types/cookie-parser": "^1.4.9",
-    "@types/multer": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -40,6 +41,9 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^13.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -48,8 +52,12 @@
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^8.5.9",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.1.0",
     "@types/supertest": "^6.0.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/uuid": "^10.0.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.12.0",
