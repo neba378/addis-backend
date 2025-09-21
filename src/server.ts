@@ -10,6 +10,7 @@ import folderRoutes from "./routes/folderRoutes";
 import fileRoutes from "./routes/fileRoutes";
 import noteRoutes from "./routes/noteRoutes";
 import authRoutes from "./modules/auth/routes/auth.routes";
+import adminRoutes from "./routes/adminRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
@@ -56,7 +57,7 @@ app.use(
   (req, res, next) => {
     // More restrictive in production
     if (isProduction()) {
-      res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+      res.header("Access-Control-Allow-Origin", "http://localhost:5000");
     } else {
       res.header("Access-Control-Allow-Origin", "*");
     }
@@ -93,6 +94,7 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/folders", folderRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Keep your existing routes if needed, or remove them
 app.use("/api/auth", authRoutes); // Keep if you need authentication

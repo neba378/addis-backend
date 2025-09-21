@@ -18,7 +18,7 @@ RUN npx prisma generate
 RUN npx prisma generate && npm run build
 
 # Expose port
-EXPOSE 3001
+EXPOSE 5000
 
 # Default command (migrations + start)
 CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
