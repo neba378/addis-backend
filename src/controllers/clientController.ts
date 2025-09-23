@@ -26,6 +26,7 @@ export const clientController = {
         createdBy,
         status,
         caseNumber,
+        notes,
       } = req.body as CreateClientInput;
 
       const client = await clientService.createClient({
@@ -37,6 +38,7 @@ export const clientController = {
         createdBy,
         status,
         caseNumber,
+        notes,
       });
 
       successResponse(

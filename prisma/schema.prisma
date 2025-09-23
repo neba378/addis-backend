@@ -102,12 +102,13 @@ model Client {
   assignedLawyer   String?
   court            String?
   createdBy        String
+  notes            String?   @db.Text
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   // Relations
   folders Folder[]
-  notes   Note[]
+  clientNotes Note[]
 
   @@map("clients")
 }

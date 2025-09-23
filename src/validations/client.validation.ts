@@ -50,6 +50,13 @@ export const createClientSchema = z.object({
       .trim()
       .optional()
       .nullable(),
+
+    notes: z
+      .string()
+      .max(2000, "Notes must be less than 2000 characters")
+      .trim()
+      .optional()
+      .nullable(),
   }),
 });
 
@@ -96,6 +103,13 @@ export const updateClientSchema = z.object({
     caseNumber: z
       .string()
       .max(50, "Case number must be less than 50 characters")
+      .trim()
+      .optional()
+      .nullable(),
+
+    notes: z
+      .string()
+      .max(2000, "Notes must be less than 2000 characters")
       .trim()
       .optional()
       .nullable(),

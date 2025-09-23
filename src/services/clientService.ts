@@ -48,6 +48,7 @@ export const clientService = {
         court: typeof data.court !== "undefined" ? data.court : null,
         createdBy: data.createdBy,
         status: data.status || "Pending",
+        notes: typeof data.notes !== "undefined" ? data.notes : null,
       },
     });
 
@@ -98,7 +99,7 @@ export const clientService = {
           folders: {
             orderBy: { name: "asc" },
           },
-          notes: {
+          clientNotes: {
             orderBy: { createdAt: "desc" },
             take: 3, // Only get recent notes for listing
           },
@@ -136,7 +137,7 @@ export const clientService = {
           },
           orderBy: { name: "asc" },
         },
-        notes: {
+        clientNotes: {
           orderBy: { createdAt: "desc" },
         },
       },

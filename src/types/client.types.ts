@@ -9,6 +9,7 @@ export interface CreateClientData {
   createdBy: string;
   status?: string | undefined;
   caseNumber?: string | null | undefined; // Optional for initial creation
+  notes?: string | null | undefined;
 }
 
 export interface UpdateClientData {
@@ -19,6 +20,7 @@ export interface UpdateClientData {
   court?: string | null | undefined;
   status?: string | undefined;
   caseNumber?: string | null | undefined; // Can be added/updated later
+  notes?: string | null | undefined;
 }
 
 export interface ClientFilters {
@@ -31,7 +33,7 @@ export interface ClientFilters {
 
 export type ClientWithRelations = Client & {
   folders: Folder[];
-  notes: Note[];
+  clientNotes: Note[];
 };
 
 export type ClientWithFolders = Client & {
