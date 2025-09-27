@@ -218,6 +218,16 @@ const options: swaggerJsdoc.Options = {
               example: 1048576,
               nullable: true,
             },
+            metaTags: {
+              type: "array",
+              description: "Array of meta tags associated with the file",
+              example: ["important", "client", "2024"],
+              items: {
+                type: "string",
+                example: "important",
+              },
+              nullable: true,
+            },
             mimeType: {
               type: "string",
               description: "File MIME type",

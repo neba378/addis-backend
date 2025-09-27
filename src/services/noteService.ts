@@ -1,40 +1,64 @@
 import prisma from "../config/db";
 import { CreateNoteData, UpdateNoteData } from "../types/note.types";
 import { PaginationParams, PaginatedResponse } from "../utils/response";
+import path from "path";
+import fs from "fs";
 
 export const noteService = {
   // Create a new note
   async createNote(data: CreateNoteData) {
-    // Verify client exists
+    // ✅ 1. Check client
     const client = await prisma.client.findUnique({
       where: { id: data.clientId },
     });
+    if (!client) throw new Error("Client not found");
 
-    if (!client) {
-      throw new Error("Client not found");
-    }
-
-    return await prisma.note.create({
+    // ✅ 2. Create the note
+    const note = await prisma.note.create({
       data: {
         title: data.title,
         content: data.content,
         clientId: data.clientId,
       },
+    });
+
+    // ✅ 3. If files were uploaded, save them
+    if (data.files && data.files.length > 0) {
+      const uploadDir = path.join(__dirname, "../../uploads/notes");
+      if (!fs.existsSync(uploadDir))
+        fs.mkdirSync(uploadDir, { recursive: true });
+
+      const fileRecords = await Promise.all(
+        data.files.map(async (file) => {
+          const filePath = path.join(uploadDir, file.originalname);
+          fs.writeFileSync(filePath, file.buffer);
+
+          return prisma.noteFile.create({
+            data: {
+              fileName: file.originalname,
+              filePath: `/uploads/notes/${file.originalname}`,
+              mimeType: file.mimetype,
+              fileSize: file.size,
+              noteId: note.id,
+            },
+          });
+        })
+      );
+    }
+
+    // ✅ 4. Return note with client + files
+    return prisma.note.findUnique({
+      where: { id: note.id },
       include: {
-        client: {
-          select: {
-            id: true,
-            fullName: true,
-            caseNumber: true,
-          },
-        },
+        client: { select: { id: true, fullName: true, caseNumber: true } },
+        files: true,
       },
     });
   },
 
   // Get all notes for a client with pagination
   async getNotesByClientId(
-    clientId: number,
+    clientId: string,
     paginationParams?: PaginationParams
   ) {
     // Verify client exists
@@ -88,7 +112,7 @@ export const noteService = {
   },
 
   // Get note by ID
-  async getNoteById(id: number) {
+  async getNoteById(id: string) {
     const note = await prisma.note.findUnique({
       where: { id },
       include: {
@@ -110,7 +134,7 @@ export const noteService = {
   },
 
   // Update note
-  async updateNote(id: number, data: UpdateNoteData) {
+  async updateNote(id: string, data: UpdateNoteData) {
     // Check if note exists
     const existingNote = await prisma.note.findUnique({
       where: { id },
@@ -139,7 +163,7 @@ export const noteService = {
   },
 
   // Delete note
-  async deleteNote(id: number): Promise<void> {
+  async deleteNote(id: string): Promise<void> {
     // Check if note exists
     const note = await prisma.note.findUnique({
       where: { id },
@@ -254,7 +278,7 @@ export const noteService = {
 
   // Search notes by content or title with pagination
   async searchNotes(
-    clientId: number,
+    clientId: string,
     searchTerm: string,
     paginationParams?: PaginationParams
   ) {

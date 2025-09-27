@@ -14,13 +14,14 @@ export const createFileSchema = z.object({
       .max(1000, "Description must be less than 1000 characters")
       .trim()
       .optional(),
-    folderId: z
-      .number({
-        required_error: "Folder ID is required",
-        invalid_type_error: "Folder ID must be a number",
-      })
-      .int("Folder ID must be an integer")
-      .positive("Folder ID must be a positive number"),
+
+    metaTags: z
+      .array(z.string().max(50, "Meta tag must be less than 50 characters"))
+      .optional(),
+    folderId: z.string({
+      required_error: "Folder ID is required",
+      invalid_type_error: "Folder ID must be a string",
+    }),
   }),
 });
 
@@ -39,6 +40,9 @@ export const updateFileSchema = z.object({
       .max(1000, "Description must be less than 1000 characters")
       .trim()
       .optional()
+      .nullable(),
+    metaTags: z
+      .array(z.string().max(50, "Meta tag must be less than 50 characters"))
       .nullable(),
   }),
 });
@@ -82,31 +86,19 @@ export const fileSearchSchema = z.object({
 // Params validation schemas
 export const fileIdParamsSchema = z.object({
   params: z.object({
-    id: z
-      .string()
-      .min(1, "File ID is required")
-      .regex(/^\d+$/, "File ID must be a number")
-      .transform(Number),
+    id: z.string().min(1, "File ID is required"),
   }),
 });
 
 export const folderIdParamsSchema = z.object({
   params: z.object({
-    folderId: z
-      .string()
-      .min(1, "Folder ID is required")
-      .regex(/^\d+$/, "Folder ID must be a number")
-      .transform(Number),
+    folderId: z.string().min(1, "Folder ID is required"),
   }),
 });
 
 export const clientIdParamsSchema = z.object({
   params: z.object({
-    clientId: z
-      .string()
-      .min(1, "Client ID is required")
-      .regex(/^\d+$/, "Client ID must be a number")
-      .transform(Number),
+    clientId: z.string().min(1, "Client ID is required"),
   }),
 });
 

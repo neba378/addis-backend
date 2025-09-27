@@ -17,7 +17,7 @@ const router = Router();
  * /folders:
  *   post:
  *     summary: Create a new folder
- *     description: Create a new custom folder for a client
+ *     description: Create a new custom folder for a client. You can also include an optional description for the folder.
  *     tags: [Folders]
  *     requestBody:
  *       required: true
@@ -33,6 +33,10 @@ const router = Router();
  *                 type: string
  *                 maxLength: 100
  *                 example: "Financial Documents"
+ *               description:
+ *                 type: string
+ *                 maxLength: 500
+ *                 example: "This folder contains all financial statements and receipts for 2024."
  *               clientId:
  *                 type: integer
  *                 example: 1
@@ -108,7 +112,7 @@ router.get(
  * /folders/{id}:
  *   put:
  *     summary: Update a folder
- *     description: Update folder name (cannot rename default folders)
+ *     description: Update folder name or description (cannot rename default folders)
  *     tags: [Folders]
  *     parameters:
  *       - in: path
@@ -123,13 +127,15 @@ router.get(
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
  *             properties:
  *               name:
  *                 type: string
  *                 maxLength: 100
  *                 example: "Updated Folder Name"
+ *               description:
+ *                 type: string
+ *                 maxLength: 500
+ *                 example: "Updated description for the folder containing 2024 contracts and invoices."
  *     responses:
  *       200:
  *         description: Folder updated successfully

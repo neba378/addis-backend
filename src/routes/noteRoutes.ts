@@ -9,6 +9,8 @@ import {
   noteIdParamsSchema,
   clientIdParamsSchema,
 } from "../validations/note.validation";
+import multer from "multer";
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
@@ -76,12 +78,12 @@ router.get("/", validate(paginationSchema), noteController.getAllNotes);
  * /notes:
  *   post:
  *     summary: Create a new note
- *     description: Create a new note for a specific client
+ *     description: Create a new note for a specific client. You can optionally upload one or multiple files with the note.
  *     tags: [Notes]
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -100,6 +102,12 @@ router.get("/", validate(paginationSchema), noteController.getAllNotes);
  *               clientId:
  *                 type: integer
  *                 example: 1
+ *               files:
+ *                 type: array
+ *                 description: Optional files to attach with the note.
+ *                 items:
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       201:
  *         description: Note created successfully
@@ -125,7 +133,12 @@ router.get("/", validate(paginationSchema), noteController.getAllNotes);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/", validate(createNoteSchema), noteController.createNote);
+router.post(
+  "/",
+  validate(createNoteSchema),
+  upload.array("files"), // ✅ matches "files" name above
+  noteController.createNote
+);
 
 /**
  * @swagger

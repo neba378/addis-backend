@@ -20,8 +20,15 @@ export const noteController = {
   async createNote(req: Request, res: Response) {
     try {
       const { title, content, clientId } = req.body as CreateNoteInput;
+      const files = req.files as Express.Multer.File[]; // 👈 from multer
 
-      const note = await noteService.createNote({ title, content, clientId });
+      const note = await noteService.createNote({
+        title,
+        content,
+        clientId: clientId,
+        files, // 👈 pass to service
+      });
+
       successResponse(res, note, "Note created successfully", 201);
     } catch (error: any) {
       if (error.message === "Client not found") {
@@ -94,7 +101,7 @@ export const noteController = {
       const numericPage = page ? Number(page) : 1;
       const numericLimit = limit ? Number(limit) : 10;
 
-      const result = await noteService.getNotesByClientId(Number(clientId), {
+      const result = await noteService.getNotesByClientId(clientId, {
         page: numericPage,
         limit: numericLimit,
         sortBy,
@@ -120,7 +127,7 @@ export const noteController = {
     try {
       const { id } = req.params as unknown as NoteIdParams;
 
-      const note = await noteService.getNoteById(Number(id));
+      const note = await noteService.getNoteById(id);
       successResponse(res, note, "Note retrieved successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -140,7 +147,7 @@ export const noteController = {
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;
 
-      const note = await noteService.updateNote(Number(id), updateData);
+      const note = await noteService.updateNote(id, updateData);
       successResponse(res, note, "Note updated successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -155,7 +162,7 @@ export const noteController = {
     try {
       const { id } = req.params as unknown as NoteIdParams;
 
-      await noteService.deleteNote(Number(id));
+      await noteService.deleteNote(id);
       successResponse(res, null, "Note deleted successfully");
     } catch (error: any) {
       if (error.message === "Note not found") {
@@ -174,7 +181,7 @@ export const noteController = {
       const numericPage = page ? Number(page) : 1;
       const numericLimit = limit ? Number(limit) : 10;
 
-      const result = await noteService.searchNotes(Number(clientId), q, {
+      const result = await noteService.searchNotes(clientId, q, {
         page: numericPage,
         limit: numericLimit,
         sortBy,

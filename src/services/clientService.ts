@@ -125,7 +125,7 @@ export const clientService = {
   },
 
   // Get client by ID with relations
-  async getClientById(id: number): Promise<ClientWithRelations> {
+  async getClientById(id: string): Promise<ClientWithRelations> {
     const client = await prisma.client.findUnique({
       where: { id },
       include: {
@@ -152,7 +152,7 @@ export const clientService = {
 
   // Update client
   async updateClient(
-    id: number,
+    id: string,
     data: UpdateClientData
   ): Promise<ClientWithRelations> {
     // Check if client exists
@@ -204,7 +204,7 @@ export const clientService = {
   },
 
   // Delete client
-  async deleteClient(id: number): Promise<void> {
+  async deleteClient(id: string): Promise<void> {
     // Check if client exists
     const client = await prisma.client.findUnique({
       where: { id },

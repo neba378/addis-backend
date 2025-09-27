@@ -90,7 +90,7 @@ export const clientController = {
     try {
       const { id } = req.params as unknown as ClientIdParams;
 
-      const client = await clientService.getClientById(Number(id));
+      const client = await clientService.getClientById(id);
       successResponse(res, client, "Client retrieved successfully");
     } catch (error: any) {
       if (error.message === "Client not found") {
@@ -114,7 +114,7 @@ export const clientController = {
         status,
       } = req.body as UpdateClientInput;
 
-      const client = await clientService.updateClient(Number(id), {
+      const client = await clientService.updateClient(id, {
         fullName,
         caseNumber,
         phoneNumber,
@@ -141,7 +141,7 @@ export const clientController = {
     try {
       const { id } = req.params as unknown as ClientIdParams;
 
-      await clientService.deleteClient(Number(id));
+      await clientService.deleteClient(id);
       successResponse(res, null, "Client deleted successfully");
     } catch (error: any) {
       if (error.message === "Client not found") {

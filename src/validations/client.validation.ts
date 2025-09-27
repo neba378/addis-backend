@@ -154,11 +154,7 @@ export const clientSearchSchema = z.object({
 // Params validation schemas
 export const clientIdParamsSchema = z.object({
   params: z.object({
-    id: z
-      .string()
-      .min(1, "Client ID is required")
-      .regex(/^\d+$/, "Client ID must be a number")
-      .transform(Number),
+    id: z.string().min(1, "Client ID is required"),
   }),
 });
 

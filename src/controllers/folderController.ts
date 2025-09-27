@@ -19,9 +19,15 @@ export const folderController = {
   // Create a new folder
   async createFolder(req: Request, res: Response) {
     try {
-      const { name, clientId, type } = req.body as CreateFolderInput;
+      const { name, clientId, type, description } =
+        req.body as CreateFolderInput;
 
-      const folder = await folderService.createFolder({ name, clientId, type });
+      const folder = await folderService.createFolder({
+        name,
+        clientId,
+        type,
+        description,
+      });
       successResponse(res, folder, "Folder created successfully", 201);
     } catch (error: any) {
       if (error.message === "Client not found") {
@@ -43,7 +49,7 @@ export const folderController = {
       const { page, limit, sortBy, sortOrder } =
         req.query as unknown as PaginationInput;
 
-      const numericClientId = Number(clientId);
+      const numericClientId = clientId;
       const numericPage = page ? Number(page) : 1;
       const numericLimit = limit ? Number(limit) : 10;
 
@@ -72,7 +78,7 @@ export const folderController = {
   async getFolderById(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FolderIdParams;
-      const numericId = Number(id);
+      const numericId = id;
       const folder = await folderService.getFolderById(numericId);
       successResponse(res, folder, "Folder retrieved successfully");
     } catch (error: any) {
@@ -87,9 +93,12 @@ export const folderController = {
   async updateFolder(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FolderIdParams;
-      const { name } = req.body as UpdateFolderInput;
+      const { name, description } = req.body as UpdateFolderInput;
 
-      const folder = await folderService.updateFolder(Number(id), { name });
+      const folder = await folderService.updateFolder(id, {
+        name,
+        description,
+      });
       successResponse(res, folder, "Folder updated successfully");
     } catch (error: any) {
       if (error.message === "Folder not found") {
@@ -110,7 +119,7 @@ export const folderController = {
     try {
       const { id } = req.params as unknown as FolderIdParams;
 
-      await folderService.deleteFolder(Number(id));
+      await folderService.deleteFolder(id);
       successResponse(res, null, "Folder deleted successfully");
     } catch (error: any) {
       if (error.message === "Folder not found") {
@@ -136,7 +145,7 @@ export const folderController = {
       const numericPage = page ? Number(page) : 1;
       const numericLimit = limit ? Number(limit) : 10;
 
-      const result = await folderService.searchFolders(Number(clientId), q, {
+      const result = await folderService.searchFolders(clientId, q, {
         page: numericPage,
         limit: numericLimit,
         sortBy,
@@ -159,9 +168,7 @@ export const folderController = {
     try {
       const { clientId } = req.params as unknown as ClientIdParams;
 
-      const statistics = await folderService.getFolderStatistics(
-        Number(clientId)
-      );
+      const statistics = await folderService.getFolderStatistics(clientId);
       successResponse(
         res,
         statistics,
