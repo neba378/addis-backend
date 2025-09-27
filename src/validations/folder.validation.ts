@@ -9,13 +9,16 @@ export const createFolderSchema = z.object({
       .max(100, "Folder name must be less than 100 characters")
       .trim(),
 
-    clientId: z
-      .number({
-        required_error: "Client ID is required",
-        invalid_type_error: "Client ID must be a number",
-      })
-      .int("Client ID must be an integer")
-      .positive("Client ID must be a positive number"),
+    description: z
+      .string()
+      .max(255, "Description must be less than 255 characters")
+      .trim()
+      .optional(),
+
+    clientId: z.string({
+      required_error: "Client ID is required",
+      invalid_type_error: "Client ID must be a string",
+    }),
 
     type: z.enum(["default", "custom"]).optional().default("custom"),
   }),
@@ -28,7 +31,14 @@ export const updateFolderSchema = z.object({
       .string()
       .min(1, "Folder name is required")
       .max(100, "Folder name must be less than 100 characters")
-      .trim(),
+      .trim()
+      .optional(),
+
+    description: z
+      .string()
+      .max(255, "Description must be less than 255 characters")
+      .trim()
+      .optional(),
   }),
 });
 
@@ -60,21 +70,13 @@ export const folderSearchSchema = z.object({
 // Params validation schemas
 export const folderIdParamsSchema = z.object({
   params: z.object({
-    id: z
-      .string()
-      .min(1, "Folder ID is required")
-      .regex(/^\d+$/, "Folder ID must be a number")
-      .transform(Number),
+    id: z.string().min(1, "Folder ID is required"),
   }),
 });
 
 export const clientIdParamsSchema = z.object({
   params: z.object({
-    clientId: z
-      .string()
-      .min(1, "Client ID is required")
-      .regex(/^\d+$/, "Client ID must be a number")
-      .transform(Number),
+    clientId: z.string().min(1, "Client ID is required"),
   }),
 });
 

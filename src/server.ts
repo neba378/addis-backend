@@ -43,7 +43,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
-
+app.set("trust proxy", true);
 // Body parsing middleware
 app.use(express.json({ limit: env.upload.maxFileSize + "b" })); // Use your config
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));

@@ -43,13 +43,10 @@ export const createNoteSchema = z.object({
       .max(5000, "Content must be less than 5000 characters")
       .trim(),
 
-    clientId: z
-      .number({
-        required_error: "Client ID is required",
-        invalid_type_error: "Client ID must be a number",
-      })
-      .int("Client ID must be an integer")
-      .positive("Client ID must be a positive number"),
+    clientId: z.string({
+      required_error: "Client ID is required",
+      invalid_type_error: "Client ID must be a string",
+    }),
   }),
 });
 
@@ -120,21 +117,13 @@ export const paginationSchema = z.object({
 // Params validation schemas
 export const noteIdParamsSchema = z.object({
   params: z.object({
-    id: z
-      .string()
-      .min(1, "Note ID is required")
-      .regex(/^\d+$/, "Note ID must be a number")
-      .transform(Number),
+    id: z.string().min(1, "Note ID is required"),
   }),
 });
 
 export const clientIdParamsSchema = z.object({
   params: z.object({
-    clientId: z
-      .string()
-      .min(1, "Client ID is required")
-      .regex(/^\d+$/, "Client ID must be a number")
-      .transform(Number),
+    clientId: z.string().min(1, "Client ID is required"),
   }),
 });
 

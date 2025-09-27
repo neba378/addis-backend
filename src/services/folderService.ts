@@ -32,6 +32,7 @@ export const folderService = {
     return await prisma.folder.create({
       data: {
         name: data.name,
+        description: data.description ?? null,
         type: data.type || "custom",
         clientId: data.clientId,
       },
@@ -48,7 +49,7 @@ export const folderService = {
   },
 
   // Get folder by ID with files
-  async getFolderById(id: number): Promise<FolderWithFiles> {
+  async getFolderById(id: string): Promise<FolderWithFiles> {
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
@@ -72,13 +73,12 @@ export const folderService = {
     return folder;
   },
 
-  async createDefaultFolders(clientId: number) {
+  async createDefaultFolders(clientId: string) {
     const defaultFolderNames = [
       "Case Files",
       "Identity files",
       "Evidences",
       "Contracts",
-      "Notes",
     ];
     const createFolderPromises = defaultFolderNames.map((name) =>
       prisma.folder.create({
@@ -86,6 +86,7 @@ export const folderService = {
           name,
           type: "default",
           clientId,
+          description: "",
         },
       })
     );
@@ -95,7 +96,7 @@ export const folderService = {
 
   // Get all folders for a client
   async getFoldersByClientId(
-    clientId: number,
+    clientId: string,
     paginationParams?: PaginationParams
   ) {
     const page = paginationParams?.page || 1;
@@ -137,7 +138,7 @@ export const folderService = {
 
   // Update folder name
   async updateFolder(
-    id: number,
+    id: string,
     data: UpdateFolderData
   ): Promise<FolderWithClient> {
     // Check if folder exists
@@ -173,7 +174,8 @@ export const folderService = {
     return await prisma.folder.update({
       where: { id },
       data: {
-        name: data.name!,
+        ...(data.name && { name: data.name }),
+        ...(data.description && { description: data.description }),
       },
       include: {
         client: {
@@ -188,7 +190,7 @@ export const folderService = {
   },
 
   // Delete folder
-  async deleteFolder(id: number): Promise<void> {
+  async deleteFolder(id: string): Promise<void> {
     // Check if folder exists
     const folder = await prisma.folder.findUnique({
       where: { id },
@@ -220,7 +222,7 @@ export const folderService = {
 
   // Search folders by name with pagination
   async searchFolders(
-    clientId: number,
+    clientId: string,
     searchTerm: string,
     paginationParams?: PaginationParams
   ) {
@@ -235,7 +237,10 @@ export const folderService = {
       prisma.folder.findMany({
         where: {
           clientId,
-          name: { contains: searchTerm },
+          OR: [
+            { name: { contains: searchTerm } },
+            { description: { contains: searchTerm } },
+          ],
         },
         include: {
           client: {
@@ -276,7 +281,7 @@ export const folderService = {
   },
 
   // Get folder statistics for a client
-  async getFolderStatistics(clientId: number) {
+  async getFolderStatistics(clientId: string) {
     const totalFolders = await prisma.folder.count({
       where: { clientId },
     });

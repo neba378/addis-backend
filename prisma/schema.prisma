@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.0.x"]
 }
 
 datasource db {
@@ -93,7 +94,7 @@ enum RequestStatus {
 }
 
 model Client {
-  id               Int       @id @default(autoincrement())
+  id               String       @id @default(uuid())
   fullName         String
   caseNumber       String    @unique @default("N/A")
   status           String    @default("Pending")
@@ -114,12 +115,13 @@ model Client {
 }
 
 model Folder {
-  id        Int      @id @default(autoincrement())
-  name      String
-  type      String   @default("custom") // 'default' or 'custom'
-  clientId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String      @id @default(uuid())
+  name        String
+  description String? 
+  type        String   @default("custom") // 'default' or 'custom'
+  clientId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -129,13 +131,14 @@ model Folder {
 }
 
 model File {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(uuid())
   fileName    String
   description String?
   filePath    String
   fileSize    Int?     // in bytes
   mimeType    String?
-  folderId    Int
+  folderId    String
+  metaTags   Json   @db.Json
   uploadedAt  DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -145,10 +148,11 @@ model File {
 }
 
 model Note {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid())
   title     String
   content   String
-  clientId  Int
+  clientId  String
+  files  NoteFile[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -156,4 +160,18 @@ model Note {
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("notes")
+}
+
+model NoteFile {
+  id        String      @id @default(uuid())
+  fileName  String
+  filePath  String
+  mimeType  String?
+  fileSize  Int?
+  noteId    String
+  uploadedAt DateTime @default(now())
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@map("note_files")
 }

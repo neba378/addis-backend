@@ -24,7 +24,7 @@ export const fileController = {
   // Create a new file record with uploaded file
   async createFile(req: Request, res: Response) {
     try {
-      const { fileName, description, folderId } = req.body;
+      const { fileName, description, folderId, metaTags } = req.body;
 
       if (!req.file) {
         return errorResponse(res, "No file uploaded", 400);
@@ -41,7 +41,7 @@ export const fileController = {
       await fsp.writeFile(destinationPath, req.file.buffer);
 
       // Validate folderId
-      const parsedFolderId = Number(folderId);
+      const parsedFolderId = folderId;
       if (isNaN(parsedFolderId)) {
         await fsp.unlink(destinationPath).catch(() => {});
         return errorResponse(res, "Folder ID must be a valid number", 400);
@@ -51,7 +51,8 @@ export const fileController = {
       const fileData = {
         fileName: fileName || req.file.originalname,
         description: description || undefined,
-        filePath: destinationPath, // ✅ now always a valid string
+        filePath: destinationPath,
+        metaTags: metaTags ? JSON.parse(metaTags) : [],
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
         folderId: parsedFolderId,
@@ -70,7 +71,7 @@ export const fileController = {
   async serveFile(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
-      const file = await fileService.getFileById(Number(id));
+      const file = await fileService.getFileById(id);
 
       if (!file) {
         return notFoundResponse(res, "File");
@@ -114,7 +115,7 @@ export const fileController = {
   async downloadFile(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
-      const file = await fileService.getFileById(Number(id));
+      const file = await fileService.getFileById(id);
 
       if (!file) {
         return notFoundResponse(res, "File");
@@ -158,7 +159,7 @@ export const fileController = {
       const { page, limit, sortBy, sortOrder } =
         req.query as unknown as PaginationInput;
 
-      const result = await fileService.getFilesByFolderId(Number(folderId), {
+      const result = await fileService.getFilesByFolderId(folderId, {
         page: Number(page || 1),
         limit: Number(limit || 10),
         sortBy,
@@ -183,7 +184,7 @@ export const fileController = {
   async getFileById(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
-      const file = await fileService.getFileById(Number(id));
+      const file = await fileService.getFileById(id);
       successResponse(res, file, "File retrieved successfully");
     } catch (error: any) {
       if (error.message === "File not found") {
@@ -197,13 +198,20 @@ export const fileController = {
   async updateFile(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
-      const { fileName, description } = req.body as UpdateFileInput;
+      const { fileName, description, metaTags } = req.body as UpdateFileInput;
 
       const updateData: UpdateFileData = {};
       if (fileName !== undefined) updateData.fileName = fileName;
       if (description !== undefined) updateData.description = description;
+      if (metaTags !== undefined) {
+        if (typeof metaTags === "string") {
+          updateData.metaTags = JSON.parse(metaTags);
+        } else {
+          updateData.metaTags = metaTags;
+        }
+      }
 
-      const file = await fileService.updateFile(Number(id), updateData);
+      const file = await fileService.updateFile(id, updateData);
       successResponse(res, file, "File updated successfully");
     } catch (error: any) {
       if (error.message === "File not found") {
@@ -217,7 +225,7 @@ export const fileController = {
   async deleteFile(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
-      const fileId = Number(id);
+      const fileId = id;
 
       // Get file info first to delete the physical file
       const file = await fileService.getFileById(fileId);
@@ -249,7 +257,7 @@ export const fileController = {
       const { q, page, limit, sortBy, sortOrder } =
         req.query as unknown as FileSearchInput;
 
-      const result = await fileService.searchFiles(Number(clientId), q, {
+      const result = await fileService.searchFiles(clientId, q, {
         page: Number(page || 1),
         limit: Number(limit || 10),
         sortBy,
@@ -271,7 +279,7 @@ export const fileController = {
   async getFileStatistics(req: Request, res: Response) {
     try {
       const { clientId } = req.params as unknown as ClientIdParams;
-      const statistics = await fileService.getFileStatistics(Number(clientId));
+      const statistics = await fileService.getFileStatistics(clientId);
       successResponse(
         res,
         statistics,

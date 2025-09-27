@@ -2,12 +2,14 @@ import { Folder, File, Client } from "@prisma/client";
 
 export interface CreateFolderData {
   name: string;
-  clientId: number;
+  clientId: string;
   type?: "default" | "custom";
+  description?: string | undefined;
 }
 
 export interface UpdateFolderData {
-  name?: string;
+  name?: string | undefined;
+  description?: string | undefined;
 }
 
 // Folder with files and client details

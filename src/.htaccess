@@ -1,0 +1,12 @@
+RewriteEngine On
+
+# Proxy all requests to your Node.js app on port 3003
+
+RewriteRule ^(.\*)$ http://localhost:3003/api/$1 [P,L]
+
+# Enable proxy
+
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+    ProxyRequests Off
+</IfModule>

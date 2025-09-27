@@ -30,6 +30,7 @@ export const fileService = {
         fileSize: data.fileSize ?? null,
         mimeType: data.mimeType ?? null,
         folderId: data.folderId,
+        metaTags: data.metaTags ?? [],
       },
       include: {
         folder: {
@@ -48,7 +49,7 @@ export const fileService = {
   },
 
   async getFilesByFolderId(
-    folderId: number,
+    folderId: string,
     paginationParams?: PaginationParams
   ): Promise<PaginatedResponse<FileWithFolder>> {
     const folder = await prisma.folder.findUnique({
@@ -108,7 +109,7 @@ export const fileService = {
   },
 
   async getFilesByfolderId(
-    folderId: number,
+    folderId: string,
     paginationParams?: PaginationParams
   ): Promise<PaginatedResponse<FileWithFolder>> {
     const client = await prisma.client.findUnique({
@@ -158,7 +159,7 @@ export const fileService = {
     };
   },
 
-  async getFileById(id: number): Promise<FileWithFolder> {
+  async getFileById(id: string): Promise<FileWithFolder> {
     const file = await prisma.file.findUnique({
       where: { id },
       include: {
@@ -180,7 +181,7 @@ export const fileService = {
     return file;
   },
 
-  async updateFile(id: number, data: UpdateFileData): Promise<FileWithFolder> {
+  async updateFile(id: string, data: UpdateFileData): Promise<FileWithFolder> {
     const existingFile = await prisma.file.findUnique({ where: { id } });
     if (!existingFile) throw new Error("File not found");
 
@@ -189,6 +190,7 @@ export const fileService = {
       data: {
         fileName: data.fileName ?? existingFile.fileName,
         description: data.description ?? existingFile.description,
+        metaTags: data.metaTags ?? [],
       },
       include: {
         folder: {
@@ -206,7 +208,7 @@ export const fileService = {
     });
   },
 
-  async deleteFile(id: number): Promise<void> {
+  async deleteFile(id: string): Promise<void> {
     const file = await prisma.file.findUnique({ where: { id } });
     if (!file) throw new Error("File not found");
 
@@ -214,7 +216,7 @@ export const fileService = {
   },
 
   async searchFiles(
-    folderId: number,
+    folderId: string,
     searchTerm: string,
     paginationParams?: PaginationParams
   ): Promise<PaginatedResponse<FileWithFolder>> {
@@ -238,6 +240,7 @@ export const fileService = {
           OR: [
             { fileName: { contains: searchTerm } },
             { description: { contains: searchTerm } },
+            { metaTags: { array_contains: [searchTerm] } },
           ],
         },
         include: {
@@ -263,6 +266,7 @@ export const fileService = {
           OR: [
             { fileName: { contains: searchTerm } },
             { description: { contains: searchTerm } },
+            { metaTags: { array_contains: [searchTerm] } },
           ],
         },
       }),
@@ -279,7 +283,7 @@ export const fileService = {
     };
   },
 
-  async getFileStatistics(folderId: number) {
+  async getFileStatistics(folderId: string) {
     const client = await prisma.client.findUnique({
       where: { id: folderId },
     });
@@ -306,7 +310,7 @@ export const fileService = {
     };
   },
 
-  async getFolderFileStatistics(folderId: number) {
+  async getFolderFileStatistics(folderId: string) {
     const folder = await prisma.folder.findUnique({
       where: { id: folderId },
     });
