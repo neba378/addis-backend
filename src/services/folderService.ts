@@ -73,20 +73,61 @@ export const folderService = {
     return folder;
   },
 
+  // {
+  //   id: 'case-files',
+  //   name: 'Case Files',
+  //   type: "case_files",
+  //   description: 'Legal documents, court filings, and case-related paperwork',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'identity-files',
+  //   name: 'Identity Files',
+  //   type: "identity_files"
+  //   description: 'Client identification documents and personal records',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'evidences',
+  //   name: 'Evidences',
+  //   type: "evidences",
+  //   description: 'Evidence materials, photos, recordings, and supporting documents',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'contracts',
+  //   name: 'Contracts',
+  //   type: "contracts",
+  //   description: 'Legal contracts, agreements, and binding documents',
+  //   isDefault: true,
+  // },
+
   async createDefaultFolders(clientId: string) {
     const defaultFolderNames = [
-      "Case Files",
-      "Identity files",
-      "Evidences",
-      "Contracts",
+      {
+        name: "Case Files",
+        description: "Legal documents, court filings, and case-related paperwork",
+      },
+      {
+        name: "Identity Files",
+        description: "Client identification documents and personal records",
+      },
+      {
+        name: "Evidences",
+        description: "Evidence materials, photos, recordings, and supporting documents",
+      },
+      {
+        name: "Contracts",
+        description: "Legal contracts, agreements, and binding documents",
+      },
     ];
-    const createFolderPromises = defaultFolderNames.map((name) =>
+    const createFolderPromises = defaultFolderNames.map((folder) =>
       prisma.folder.create({
-        data: {
-          name,
+        data: { 
+          name: folder.name,
           type: "default",
           clientId,
-          description: "",
+          description: folder.description,
         },
       })
     );
