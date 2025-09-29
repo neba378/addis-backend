@@ -52,9 +52,7 @@ export const fileUploadSchema = z.object({
   params: z.object({
     folderId: z
       .string()
-      .min(1, "Folder ID is required")
-      .regex(/^\d+$/, "Folder ID must be a number")
-      .transform(Number),
+      .min(1, "Folder ID is required"),
   }),
 });
 
