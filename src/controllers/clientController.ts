@@ -21,7 +21,7 @@ export const clientController = {
         fullName,
         phoneNumber,
         appointmentDate,
-        assignedLawyer,
+        assignedLawyer, // This should be assignedLawyerId for consistency
         court,
         createdBy,
         status,
@@ -33,7 +33,7 @@ export const clientController = {
         fullName,
         phoneNumber,
         appointmentDate,
-        assignedLawyer,
+        assignedLawyer, // Make sure this matches the service parameter name
         court,
         createdBy,
         status,
@@ -119,7 +119,7 @@ export const clientController = {
         caseNumber,
         phoneNumber,
         appointmentDate,
-        assignedLawyer,
+        assignedLawyer: assignedLawyer === null ? undefined : assignedLawyer,
         court,
         status,
       });

@@ -9,7 +9,7 @@ import clientRoutes from "./routes/clientRoutes";
 import folderRoutes from "./routes/folderRoutes";
 import fileRoutes from "./routes/fileRoutes";
 import noteRoutes from "./routes/noteRoutes";
-import authRoutes from "./modules/auth/routes/auth.routes";
+import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/adminRoutes";
 
 // Import middleware and utilities
@@ -17,6 +17,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { env, isProduction } from "./config/env"; // Your enhanced env config
 import { setupSwagger } from "./config/swagger";
 import prisma from "./config/db"; // Your Prisma client
+import { superadminService } from "./services/superadmin.service";
 
 const app = express();
 const PORT = env.app.port;
@@ -132,6 +133,7 @@ app.listen(PORT, () => {
   console.log(`📁 Folders API: http://localhost:${PORT}/api/folders`);
   console.log(`📂 Files API: http://localhost:${PORT}/api/files`);
   console.log(`📝 Notes API: http://localhost:${PORT}/api/notes`);
+  console.log(`🔐 Auth API: http://localhost:${PORT}/api/auth`);
   console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
   console.log(`💾 Upload directory: ${path.join(__dirname, "../uploads")}`);
 
@@ -139,4 +141,13 @@ app.listen(PORT, () => {
   // TokenCleanupService.startCleanup();
 });
 
+async function init() {
+  try {
+    await superadminService.createDefaultSuperAdmin();
+  } catch (error) {
+    console.error("Failed to initialize super admin:", error);
+    process.exit(1);
+  }
+}
+init();
 export default app;
