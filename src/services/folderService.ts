@@ -73,6 +73,35 @@ export const folderService = {
     return folder;
   },
 
+  // {
+  //   id: 'case-files',
+  //   name: 'Case Files',
+  //   type: "case_files",
+  //   description: 'Legal documents, court filings, and case-related paperwork',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'identity-files',
+  //   name: 'Identity Files',
+  //   type: "identity_files"
+  //   description: 'Client identification documents and personal records',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'evidences',
+  //   name: 'Evidences',
+  //   type: "evidences",
+  //   description: 'Evidence materials, photos, recordings, and supporting documents',
+  //   isDefault: true,
+  // },
+  // {
+  //   id: 'contracts',
+  //   name: 'Contracts',
+  //   type: "contracts",
+  //   description: 'Legal contracts, agreements, and binding documents',
+  //   isDefault: true,
+  // },
+
   async createDefaultFolders(clientId: string) {
     const defaultFolderNamesToDescription = {
       "Case Files":
@@ -88,7 +117,7 @@ export const folderService = {
     ).map(([name, description]) =>
       prisma.folder.create({
         data: {
-          name,
+          name: folder.name,
           type: "default",
           clientId,
           description,

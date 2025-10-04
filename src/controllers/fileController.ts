@@ -51,7 +51,7 @@ export const fileController = {
         metaTags: metaTags ? JSON.parse(metaTags) : [],
         fileSize: req.file.size,
         mimeType: req.file.mimetype,
-        folderId: parsedFolderId,
+        folderId: folderId,
       };
 
       // Store in DB
@@ -67,20 +67,26 @@ export const fileController = {
   async serveFile(req: Request, res: Response) {
     try {
       const { id } = req.params as unknown as FileIdParams;
+      console.log("📄 Serving file request for ID:", id);
       const file = await fileService.getFileById(id);
 
       if (!file) {
+        console.log("❌ File not found in database for ID:", id);
         return notFoundResponse(res, "File");
       }
+
+      console.log("✅ File found:", file.fileName, "Path:", file.filePath);
 
       // Check if file exists on disk
       try {
         await fsp.access(file.filePath); // Use fsp.access
-      } catch {
+        console.log("✅ File exists on disk:", file.filePath);
+      } catch (error) {
+        console.log("❌ File not found on disk:", file.filePath, error);
         return notFoundResponse(res, "File not found on server");
       }
 
-      // Set appropriate headers
+      // Set appropriate headers for file viewing/embedding
       res.setHeader(
         "Content-Type",
         file.mimeType || "application/octet-stream"
@@ -90,6 +96,26 @@ export const fileController = {
         `inline; filename="${file.fileName}"`
       );
       res.setHeader("Content-Length", file.fileSize?.toString() || "0");
+
+      // Allow embedding for PDFs and other files (more permissive for cross-origin)
+      res.removeHeader("X-Frame-Options");
+      res.setHeader("Content-Security-Policy", "frame-ancestors *");
+
+      // Set CORS headers for file access
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, Range"
+      );
+      res.setHeader(
+        "Access-Control-Expose-Headers",
+        "Content-Length, Content-Range, Accept-Ranges"
+      );
+      res.setHeader("Accept-Ranges", "bytes");
+
+      // Cache headers for better performance
+      res.setHeader("Cache-Control", "public, max-age=86400"); // 24 hours
 
       // Stream the file (use standard fs for createReadStream)
       const fileStream = fs.createReadStream(file.filePath);
