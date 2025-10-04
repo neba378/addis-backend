@@ -74,19 +74,24 @@ export const folderService = {
   },
 
   async createDefaultFolders(clientId: string) {
-    const defaultFolderNames = [
-      "Case Files",
-      "Identity files",
-      "Evidences",
-      "Contracts",
-    ];
-    const createFolderPromises = defaultFolderNames.map((name) =>
+    const defaultFolderNamesToDescription = {
+      "Case Files":
+        "Legal documents, court filings, and case-related paperwork",
+      "Identity files": "Client identification documents and personal records",
+      Evidences:
+        "Evidence materials, photos, recordings, and supporting documents",
+      Contracts: "Legal contracts, agreements, and binding documents",
+    };
+
+    const createFolderPromises = Object.entries(
+      defaultFolderNamesToDescription
+    ).map(([name, description]) =>
       prisma.folder.create({
         data: {
           name,
           type: "default",
           clientId,
-          description: "",
+          description,
         },
       })
     );

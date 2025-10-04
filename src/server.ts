@@ -29,9 +29,10 @@ app.use(
   cors({
     origin: isProduction()
       ? [
-          "http://localhost:3000",
+          "https://api.addisfirm.com",
           "http://localhost:3001",
           "http://localhost:5173",
+          "https://api.addisfirm.com/api-docs", // Add Swagger UI if needed
         ] // Replace with your production domain
       : [
           "http://localhost:3000",

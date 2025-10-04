@@ -40,12 +40,8 @@ export const fileController = {
       // Save file from memory buffer to disk
       await fsp.writeFile(destinationPath, req.file.buffer);
 
-      // Validate folderId
-      const parsedFolderId = folderId;
-      if (isNaN(parsedFolderId)) {
-        await fsp.unlink(destinationPath).catch(() => {});
-        return errorResponse(res, "Folder ID must be a valid number", 400);
-      }
+      // Use folderId as string (UUID)
+      const parsedFolderId: string = folderId;
 
       // Prepare file data for DB
       const fileData = {
