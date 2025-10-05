@@ -11,9 +11,15 @@ import {
 } from "../validations/file.validation";
 import { paginationSchema } from "../validations/note.validation";
 import multer from "multer";
+import {
+  authenticate,
+  requireManagerOrSuperAdmin,
+} from "../middlewares/auth.middleware";
 const upload = multer();
 
 const router = Router();
+
+router.use(authenticate);
 
 /**
  * @swagger
@@ -261,7 +267,12 @@ router.put(
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.delete("/:id", validate(fileIdParamsSchema), fileController.deleteFile);
+router.delete(
+  "/:id",
+  requireManagerOrSuperAdmin,
+  validate(fileIdParamsSchema),
+  fileController.deleteFile
+);
 
 /**
  * @swagger

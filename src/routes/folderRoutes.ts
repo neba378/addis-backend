@@ -9,8 +9,10 @@ import {
   clientIdParamsSchema,
 } from "../validations/folder.validation";
 import { paginationSchema } from "../validations/note.validation";
+import { authenticate } from "../middlewares/auth.middleware";
 
 const router = Router();
+router.use(authenticate);
 
 /**
  * @swagger

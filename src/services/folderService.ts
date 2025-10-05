@@ -117,7 +117,7 @@ export const folderService = {
     ).map(([name, description]) =>
       prisma.folder.create({
         data: {
-          name: folder.name,
+          name: name,
           type: "default",
           clientId,
           description,
