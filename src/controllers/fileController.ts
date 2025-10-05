@@ -40,11 +40,8 @@ export const fileController = {
       // Save file from memory buffer to disk
       await fsp.writeFile(destinationPath, req.file.buffer);
 
-      // Validate folderId (should be a UUID string)
-      if (!folderId || typeof folderId !== 'string' || folderId.trim().length === 0) {
-        await fsp.unlink(destinationPath).catch(() => {});
-        return errorResponse(res, "Folder ID is required", 400);
-      }
+      // Use folderId as string (UUID)
+      const parsedFolderId: string = folderId;
 
       // Prepare file data for DB
       const fileData = {
@@ -99,18 +96,24 @@ export const fileController = {
         `inline; filename="${file.fileName}"`
       );
       res.setHeader("Content-Length", file.fileSize?.toString() || "0");
-      
+
       // Allow embedding for PDFs and other files (more permissive for cross-origin)
       res.removeHeader("X-Frame-Options");
       res.setHeader("Content-Security-Policy", "frame-ancestors *");
-      
+
       // Set CORS headers for file access
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Range");
-      res.setHeader("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, Range"
+      );
+      res.setHeader(
+        "Access-Control-Expose-Headers",
+        "Content-Length, Content-Range, Accept-Ranges"
+      );
       res.setHeader("Accept-Ranges", "bytes");
-      
+
       // Cache headers for better performance
       res.setHeader("Cache-Control", "public, max-age=86400"); // 24 hours
 

@@ -4,7 +4,7 @@ export interface CreateClientData {
   fullName: string;
   phoneNumber: string;
   appointmentDate?: Date | string | null | undefined;
-  assignedLawyer?: string | null | undefined;
+  assignedLawyer?: string | undefined;
   court?: string | null | undefined;
   createdBy: string;
   status?: string | undefined;
@@ -16,7 +16,7 @@ export interface UpdateClientData {
   fullName?: string | undefined;
   phoneNumber?: string | undefined;
   appointmentDate?: Date | string | null | undefined;
-  assignedLawyer?: string | undefined | null;
+  assignedLawyer?: string | undefined;
   court?: string | null | undefined;
   status?: string | undefined;
   caseNumber?: string | null | undefined; // Can be added/updated later
@@ -43,7 +43,7 @@ export type ClientWithFolders = Client & {
 // For client listings
 export type ClientListItem = Pick<
   Client,
-  "id" | "fullName" | "caseNumber" | "status" | "assignedLawyer" | "createdAt"
+  "id" | "fullName" | "caseNumber" | "status" | "assignedLawyerId" | "createdAt"
 > & {
   folderCount: number;
   noteCount: number;

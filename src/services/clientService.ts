@@ -32,24 +32,28 @@ export const clientService = {
       }
     }
 
+    // Use Prisma's exact type structure
+    const createData = {
+      fullName: data.fullName,
+      caseNumber: caseNumber,
+      phoneNumber: data.phoneNumber,
+      appointmentDate: data.appointmentDate
+        ? new Date(data.appointmentDate)
+        : null,
+      court: data.court ?? null,
+      createdBy: data.createdBy,
+      status: data.status || "Pending",
+      notes: data.notes ?? null,
+      ...(data.assignedLawyer && {
+        assignedLawyer: {
+          connect: { id: data.assignedLawyer },
+        },
+      }),
+    };
+
     // Create the client
     const client = await prisma.client.create({
-      data: {
-        fullName: data.fullName,
-        caseNumber: caseNumber,
-        phoneNumber: data.phoneNumber,
-        appointmentDate: data.appointmentDate
-          ? new Date(data.appointmentDate)
-          : null,
-        assignedLawyer:
-          typeof data.assignedLawyer !== "undefined"
-            ? data.assignedLawyer
-            : null,
-        court: typeof data.court !== "undefined" ? data.court : null,
-        createdBy: data.createdBy,
-        status: data.status || "Pending",
-        notes: typeof data.notes !== "undefined" ? data.notes : null,
-      },
+      data: createData,
     });
 
     // Create default folders for this client
@@ -255,12 +259,12 @@ export const clientService = {
     });
 
     const clientsByLawyer = await prisma.client.groupBy({
-      by: ["assignedLawyer"],
+      by: ["assignedLawyerId"],
       _count: {
-        assignedLawyer: true,
+        assignedLawyerId: true,
       },
       where: {
-        assignedLawyer: { not: null },
+        assignedLawyerId: { not: null },
       },
     });
 

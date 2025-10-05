@@ -26,9 +26,7 @@ export const createClientSchema = z.object({
       .string()
       .max(100, "Lawyer name must be less than 100 characters")
       .trim()
-      .optional()
-      .nullable(),
-
+      .optional(),
     court: z
       .string()
       .max(100, "Court name must be less than 100 characters")

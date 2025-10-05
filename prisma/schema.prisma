@@ -1,6 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.0.x"]
 }
 
 datasource db {
@@ -9,13 +9,33 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  name        String
+  email       String    @unique
+  password    String
+  role        UserRole  @default(LAWYER)
+  status      Status    @default(PENDING)
+  department  String?
+  phoneNumber String?
+  lastLogin   DateTime?
+  joinedAt    DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Client      Client[]
 
   @@map("users")
+}
+
+enum UserRole {
+  LAWYER
+  MANAGER
+  SUPER_ADMIN
+}
+
+enum Status {
+  PENDING
+  ACTIVE
+  INACTIVE
 }
 
 model Admin {
@@ -46,18 +66,18 @@ model RefreshToken {
 }
 
 model Arbitrator {
-  id                String   @id @default(cuid())
-  fullName          String
-  profilePicture    String?  // URL to profile picture
-  location          String
-  languages         String   // JSON string of languages
+  id                  String   @id @default(cuid())
+  fullName            String
+  profilePicture      String? // URL to profile picture
+  location            String
+  languages           String // JSON string of languages
   specializationAreas String // JSON string of specialization areas
-  yearsOfExperience Int      @default(0) // Years of experience as an arbitrator
-  description       String   @db.Text
-  isActive          Boolean  @default(true)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  yearsOfExperience   Int      @default(0) // Years of experience as an arbitrator
+  description         String   @db.Text
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
   // Relations
   arbitrationRequests ArbitrationRequest[]
 
@@ -65,20 +85,20 @@ model Arbitrator {
 }
 
 model ArbitrationRequest {
-  id                String   @id @default(cuid())
-  fullName          String
-  phoneNumber       String
-  emailAddress      String?
-  location          String?
-  preferredLanguages String? // JSON string of preferred languages
-  typeOfDispute     String
-  disputeSummary    String   @db.Text
+  id                    String        @id @default(cuid())
+  fullName              String
+  phoneNumber           String
+  emailAddress          String?
+  location              String?
+  preferredLanguages    String? // JSON string of preferred languages
+  typeOfDispute         String
+  disputeSummary        String        @db.Text
   preferredArbitratorId String? // Optional reference to preferred arbitrator
-  status            RequestStatus @default(PENDING)
-  adminNotes        String?  @db.Text
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  
+  status                RequestStatus @default(PENDING)
+  adminNotes            String?       @db.Text
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
   // Relations
   preferredArbitrator Arbitrator? @relation(fields: [preferredArbitratorId], references: [id])
 
@@ -94,13 +114,13 @@ enum RequestStatus {
 }
 
 model Client {
-  id               String       @id @default(uuid())
+  id               String    @id @default(uuid())
   fullName         String
   caseNumber       String    @unique @default("N/A")
   status           String    @default("Pending")
   phoneNumber      String
   appointmentDate  DateTime?
-  assignedLawyer   String?
+  assignedLawyerId String? // Reference to User
   court            String?
   createdBy        String
   notes            String?   @db.Text
@@ -108,16 +128,17 @@ model Client {
   updatedAt        DateTime  @updatedAt
 
   // Relations
-  folders Folder[]
-  clientNotes Note[]
+  assignedLawyer User?    @relation(fields: [assignedLawyerId], references: [id])
+  folders        Folder[]
+  clientNotes    Note[]
 
   @@map("clients")
 }
 
 model Folder {
-  id          String      @id @default(uuid())
+  id          String   @id @default(uuid())
   name        String
-  description String? 
+  description String?
   type        String   @default("custom") // 'default' or 'custom'
   clientId    String
   createdAt   DateTime @default(now())
@@ -131,30 +152,31 @@ model Folder {
 }
 
 model File {
-  id          String      @id @default(uuid())
+  id          String   @id @default(uuid())
   fileName    String
   description String?
   filePath    String
-  fileSize    Int?     // in bytes
+  fileSize    Int? // in bytes
   mimeType    String?
   folderId    String
-  metaTags   Json   @db.Json
+  metaTags    Json     @db.Json
   uploadedAt  DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
   folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
   @@map("files")
 }
 
 model Note {
-  id        String      @id @default(uuid())
+  id        String     @id @default(uuid())
   title     String
   content   String
   clientId  String
-  files  NoteFile[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  files     NoteFile[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   // Relations
   client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
@@ -163,12 +185,12 @@ model Note {
 }
 
 model NoteFile {
-  id        String      @id @default(uuid())
-  fileName  String
-  filePath  String
-  mimeType  String?
-  fileSize  Int?
-  noteId    String
+  id         String   @id @default(uuid())
+  fileName   String
+  filePath   String
+  mimeType   String?
+  fileSize   Int?
+  noteId     String
   uploadedAt DateTime @default(now())
 
   note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)

@@ -94,7 +94,10 @@ export const folderController = {
     try {
       const { id } = req.params as unknown as FolderIdParams;
       const { name, description } = req.body as UpdateFolderInput;
-
+      const oldFolder = await folderService.getFolderById(id);
+      if (oldFolder.type === "default") {
+        return errorResponse(res, "Cannot rename default folders", 400);
+      }
       const folder = await folderService.updateFolder(id, {
         name,
         description,
