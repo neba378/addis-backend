@@ -10,10 +10,11 @@ import {
   clientIdParamsSchema,
 } from "../validations/note.validation";
 import multer from "multer";
+import { authenticate } from "../middlewares/auth.middleware";
 const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
-
+router.use(authenticate);
 /**
  * @swagger
  * /notes:

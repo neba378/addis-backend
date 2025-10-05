@@ -59,7 +59,7 @@ app.use(
   (req, res, next) => {
     // More restrictive in production
     if (isProduction()) {
-      res.header("Access-Control-Allow-Origin", "http://localhost:5000");
+      res.header("Access-Control-Allow-Origin", "*");
     } else {
       res.header("Access-Control-Allow-Origin", "*");
     }

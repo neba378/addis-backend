@@ -7,6 +7,7 @@ import {
 } from "../types/client.types";
 import { PaginationParams, PaginatedResponse } from "../utils/response";
 import { folderService } from "./folderService";
+import { UserRole } from "@prisma/client";
 
 export const clientService = {
   // Generate temporary case number
@@ -63,10 +64,12 @@ export const clientService = {
     return this.getClientById(client.id);
   },
 
-  // Get all clients with their folders and notes
+  // Get all clients with their folders and notes - WITH RBAC
   async getClients(
     paginationParams?: PaginationParams,
-    filters?: ClientFilters
+    filters?: ClientFilters,
+    userRole?: UserRole,
+    userId?: string
   ): Promise<PaginatedResponse<ClientWithRelations>> {
     const page = Number(paginationParams?.page) || 1;
     const limit = Number(paginationParams?.limit) || 10;
@@ -75,9 +78,16 @@ export const clientService = {
     const sortBy = paginationParams?.sortBy || "createdAt";
     const sortOrder = paginationParams?.sortOrder || "desc";
 
-    // Build where clause for filters
+    // Build where clause for filters AND RBAC
     const where: any = {};
 
+    // RBAC: Lawyers can only see their assigned clients
+    if (userRole === UserRole.LAWYER && userId) {
+      where.assignedLawyerId = userId;
+    }
+    // Managers and Super Admins can see all clients (no additional filter)
+
+    // Apply additional filters
     if (filters?.status) where.status = filters.status;
     if (filters?.caseNumber)
       where.caseNumber = { contains: filters.caseNumber };
@@ -85,9 +95,9 @@ export const clientService = {
 
     if (filters?.search) {
       where.OR = [
-        { fullName: { contains: filters.search } },
-        { caseNumber: { contains: filters.search } },
-        { assignedLawyer: { contains: filters.search } },
+        { fullName: { contains: filters.search, mode: "insensitive" } },
+        { caseNumber: { contains: filters.search, mode: "insensitive" } },
+        { assignedLawyer: { contains: filters.search, mode: "insensitive" } },
       ];
     }
 
@@ -106,6 +116,13 @@ export const clientService = {
           clientNotes: {
             orderBy: { createdAt: "desc" },
             take: 3, // Only get recent notes for listing
+          },
+          assignedLawyer: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
           },
         },
         orderBy: { [sortBy]: sortOrder },
@@ -128,8 +145,12 @@ export const clientService = {
     };
   },
 
-  // Get client by ID with relations
-  async getClientById(id: string): Promise<ClientWithRelations> {
+  // Get client by ID with relations - WITH RBAC
+  async getClientById(
+    id: string,
+    userRole?: UserRole,
+    userId?: string
+  ): Promise<ClientWithRelations> {
     const client = await prisma.client.findUnique({
       where: { id },
       include: {
@@ -144,6 +165,13 @@ export const clientService = {
         clientNotes: {
           orderBy: { createdAt: "desc" },
         },
+        assignedLawyer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
@@ -151,13 +179,20 @@ export const clientService = {
       throw new Error("Client not found");
     }
 
+    // RBAC: Lawyers can only access their assigned clients
+    if (userRole === UserRole.LAWYER && client.assignedLawyerId !== userId) {
+      throw new Error("Access denied");
+    }
+
     return client;
   },
 
-  // Update client
+  // Update client - WITH RBAC
   async updateClient(
     id: string,
-    data: UpdateClientData
+    data: UpdateClientData,
+    userRole?: UserRole,
+    userId?: string
   ): Promise<ClientWithRelations> {
     // Check if client exists
     const existingClient = await prisma.client.findUnique({
@@ -166,6 +201,23 @@ export const clientService = {
 
     if (!existingClient) {
       throw new Error("Client not found");
+    }
+
+    // RBAC: Lawyers can only update their assigned clients
+    if (
+      userRole === UserRole.LAWYER &&
+      existingClient.assignedLawyerId !== userId
+    ) {
+      throw new Error("Access denied");
+    }
+
+    // RBAC: Lawyers cannot change assigned lawyer
+    if (
+      userRole === UserRole.LAWYER &&
+      data.assignedLawyer &&
+      data.assignedLawyer !== existingClient.assignedLawyerId
+    ) {
+      throw new Error("Cannot change assigned lawyer");
     }
 
     // Check if case number is being updated and if it already exists
@@ -194,10 +246,21 @@ export const clientService = {
       updateData.appointmentDate = data.appointmentDate
         ? new Date(data.appointmentDate)
         : null;
-    if (typeof data.assignedLawyer !== "undefined")
-      updateData.assignedLawyer = data.assignedLawyer;
     if (typeof data.court !== "undefined") updateData.court = data.court;
     if (typeof data.status !== "undefined") updateData.status = data.status;
+
+    // Handle assigned lawyer update (only for managers and super admins)
+    if (typeof data.assignedLawyer !== "undefined") {
+      if (data.assignedLawyer) {
+        updateData.assignedLawyer = {
+          connect: { id: data.assignedLawyer },
+        };
+      } else {
+        updateData.assignedLawyer = {
+          disconnect: true,
+        };
+      }
+    }
 
     const client = await prisma.client.update({
       where: { id },
@@ -207,8 +270,8 @@ export const clientService = {
     return this.getClientById(client.id);
   },
 
-  // Delete client
-  async deleteClient(id: string): Promise<void> {
+  // Delete client - WITH RBAC (only managers and super admins)
+  async deleteClient(id: string, userRole?: UserRole): Promise<void> {
     // Check if client exists
     const client = await prisma.client.findUnique({
       where: { id },
@@ -218,44 +281,70 @@ export const clientService = {
       throw new Error("Client not found");
     }
 
+    // RBAC: Only managers and super admins can delete clients
+    if (userRole === UserRole.LAWYER) {
+      throw new Error("Access denied");
+    }
+
     await prisma.client.delete({
       where: { id },
     });
   },
 
-  // Search clients with filters
+  // Search clients with filters - WITH RBAC
   async searchClients(
     filters: ClientFilters,
-    paginationParams?: PaginationParams
+    paginationParams?: PaginationParams,
+    userRole?: UserRole,
+    userId?: string
   ): Promise<PaginatedResponse<ClientWithRelations>> {
-    return this.getClients(paginationParams, filters);
+    return this.getClients(paginationParams, filters, userRole, userId);
   },
 
-  // Get clients by status
+  // Get clients by status - WITH RBAC
   async getClientsByStatus(
     status: string,
-    paginationParams?: PaginationParams
+    paginationParams?: PaginationParams,
+    userRole?: UserRole,
+    userId?: string
   ): Promise<PaginatedResponse<ClientWithRelations>> {
-    return this.getClients(paginationParams, { status });
+    return this.getClients(paginationParams, { status }, userRole, userId);
   },
 
-  // Get clients by lawyer
+  // Get clients by lawyer - WITH RBAC (only managers and super admins)
   async getClientsByLawyer(
-    lawyer: string,
-    paginationParams?: PaginationParams
+    lawyerId: string,
+    paginationParams?: PaginationParams,
+    userRole?: UserRole
   ): Promise<PaginatedResponse<ClientWithRelations>> {
-    return this.getClients(paginationParams, { lawyer });
+    // RBAC: Only managers and super admins can view clients by specific lawyer
+    if (userRole === UserRole.LAWYER) {
+      throw new Error("Access denied");
+    }
+
+    return this.getClients(paginationParams, { lawyer: lawyerId });
   },
 
-  // Get client statistics
-  async getClientStatistics() {
-    const totalClients = await prisma.client.count();
+  // Get client statistics - WITH RBAC
+  async getClientStatistics(userRole?: UserRole, userId?: string) {
+    // Build where condition based on RBAC
+    let whereCondition: any = {};
+
+    // Lawyers can only see statistics for their assigned clients
+    if (userRole === UserRole.LAWYER && userId) {
+      whereCondition.assignedLawyerId = userId;
+    }
+
+    const totalClients = await prisma.client.count({
+      where: whereCondition,
+    });
 
     const clientsByStatus = await prisma.client.groupBy({
       by: ["status"],
       _count: {
         status: true,
       },
+      where: whereCondition,
     });
 
     const clientsByLawyer = await prisma.client.groupBy({
@@ -264,11 +353,13 @@ export const clientService = {
         assignedLawyerId: true,
       },
       where: {
+        ...whereCondition,
         assignedLawyerId: { not: null },
       },
     });
 
     const recentClients = await prisma.client.findMany({
+      where: whereCondition,
       orderBy: { createdAt: "desc" },
       take: 5,
       select: {
@@ -277,6 +368,12 @@ export const clientService = {
         caseNumber: true,
         status: true,
         createdAt: true,
+        assignedLawyer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
