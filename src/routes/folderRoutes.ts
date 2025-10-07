@@ -16,7 +16,6 @@ import {
 
 const router = Router();
 router.use(authenticate);
-router.use(authenticate);
 
 /**
  * @swagger
