@@ -34,12 +34,6 @@ export const createClientSchema = z.object({
       .optional()
       .nullable(),
 
-    createdBy: z
-      .string()
-      .min(2, "Created by must be at least 2 characters")
-      .max(100, "Created by must be less than 100 characters")
-      .trim(),
-
     status: z.string().default("Pending").optional(),
 
     caseNumber: z

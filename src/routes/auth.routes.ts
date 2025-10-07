@@ -1,6 +1,11 @@
-import { Router } from "express";
+import { Response, Router, Request } from "express";
 import { authController } from "../controllers/auth.controller";
 import { validate } from "../middlewares/validation.middleware";
+
+// Define AuthRequest type if not imported from elsewhere
+interface AuthRequest extends Request {
+  user?: any; // Replace 'any' with your actual user type if available
+}
 import {
   loginSchema,
   inviteUserSchema,
@@ -16,9 +21,27 @@ import {
   requireManagerOrSuperAdmin,
   requireSuperAdmin,
 } from "../middlewares/auth.middleware";
+import { emailService } from "../services/email.service";
+import { errorResponse, successResponse } from "../utils/response";
 
 const router = Router();
-
+// In your auth routes
+router.post(
+  "/test-email",
+  authenticate,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const result = await emailService.testEmailService();
+      if (result) {
+        successResponse(res, null, "Email service is working correctly");
+      } else {
+        errorResponse(res, "Email service test failed", 500);
+      }
+    } catch (error: any) {
+      errorResponse(res, "Email service test failed", 500, error.message);
+    }
+  }
+);
 /**
  * @swagger
  * /auth/login:

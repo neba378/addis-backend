@@ -9,8 +9,14 @@ import {
   clientIdParamsSchema,
 } from "../validations/folder.validation";
 import { paginationSchema } from "../validations/note.validation";
+import {
+  authenticate,
+  requireManagerOrSuperAdmin,
+} from "../middlewares/auth.middleware";
 
 const router = Router();
+router.use(authenticate);
+router.use(authenticate);
 
 /**
  * @swagger
@@ -165,6 +171,7 @@ router.put(
   "/:id",
   validate(folderIdParamsSchema),
   validate(updateFolderSchema),
+  requireManagerOrSuperAdmin,
   folderController.updateFolder
 );
 
@@ -208,6 +215,7 @@ router.put(
 router.delete(
   "/:id",
   validate(folderIdParamsSchema),
+  requireManagerOrSuperAdmin,
   folderController.deleteFolder
 );
 

@@ -5,6 +5,7 @@ import {
   successResponse,
   errorResponse,
   notFoundResponse,
+  forbiddenResponse,
 } from "../utils/response";
 import {
   CreateClientInput,
@@ -12,28 +13,30 @@ import {
   ClientSearchInput,
   ClientIdParams,
 } from "../validations/client.validation";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 export const clientController = {
   // Create a new client
-  async createClient(req: Request, res: Response) {
+  async createClient(req: AuthRequest, res: Response) {
     try {
       const {
         fullName,
         phoneNumber,
         appointmentDate,
-        assignedLawyer, // This should be assignedLawyerId for consistency
+        assignedLawyer,
         court,
-        createdBy,
         status,
         caseNumber,
         notes,
       } = req.body as CreateClientInput;
 
+      const createdBy = req.user!.id; // Get from authenticated user
+
       const client = await clientService.createClient({
         fullName,
         phoneNumber,
         appointmentDate,
-        assignedLawyer, // Make sure this matches the service parameter name
+        assignedLawyer,
         court,
         createdBy,
         status,
@@ -55,8 +58,8 @@ export const clientController = {
     }
   },
 
-  // Get all clients with optional filtering
-  async getClients(req: Request, res: Response) {
+  // Get all clients with optional filtering - WITH RBAC
+  async getClients(req: AuthRequest, res: Response) {
     try {
       const { page, limit, sortBy, sortOrder, status, lawyer, startDate } =
         req.query as unknown as ClientSearchInput;
@@ -69,9 +72,15 @@ export const clientController = {
         startDate: startDate ? new Date(startDate) : undefined,
       };
 
+      // Get user info from auth middleware for RBAC
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+
       const result = await clientService.getClients(
         { page: numericPage, limit: numericLimit, sortBy, sortOrder },
-        filters
+        filters,
+        userRole,
+        userId
       );
 
       paginatedResponse(
@@ -85,23 +94,30 @@ export const clientController = {
     }
   },
 
-  // Get client by ID
-  async getClientById(req: Request, res: Response) {
+  // Get client by ID - WITH RBAC
+  async getClientById(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params as unknown as ClientIdParams;
 
-      const client = await clientService.getClientById(id);
+      // Get user info from auth middleware for RBAC
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+
+      const client = await clientService.getClientById(id, userRole, userId);
       successResponse(res, client, "Client retrieved successfully");
     } catch (error: any) {
       if (error.message === "Client not found") {
         return notFoundResponse(res, "Client");
       }
+      if (error.message === "Access denied") {
+        return forbiddenResponse(res, "Access denied to this client");
+      }
       errorResponse(res, "Failed to retrieve client", 500, error.message);
     }
   },
 
-  // Update client
-  async updateClient(req: Request, res: Response) {
+  // Update client - WITH RBAC
+  async updateClient(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params as unknown as ClientIdParams;
       const {
@@ -114,15 +130,24 @@ export const clientController = {
         status,
       } = req.body as UpdateClientInput;
 
-      const client = await clientService.updateClient(id, {
-        fullName,
-        caseNumber,
-        phoneNumber,
-        appointmentDate,
-        assignedLawyer: assignedLawyer === null ? undefined : assignedLawyer,
-        court,
-        status,
-      });
+      // Get user info from auth middleware for RBAC
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+
+      const client = await clientService.updateClient(
+        id,
+        {
+          fullName,
+          caseNumber,
+          phoneNumber,
+          appointmentDate,
+          assignedLawyer: assignedLawyer === null ? undefined : assignedLawyer,
+          court,
+          status,
+        },
+        userRole,
+        userId
+      );
 
       successResponse(res, client, "Client updated successfully");
     } catch (error: any) {
@@ -132,27 +157,39 @@ export const clientController = {
       if (error.message === "Case number already exists") {
         return errorResponse(res, error.message, 400);
       }
+      if (
+        error.message === "Access denied" ||
+        error.message === "Cannot change assigned lawyer"
+      ) {
+        return forbiddenResponse(res, error.message);
+      }
       errorResponse(res, "Failed to update client", 500, error.message);
     }
   },
 
-  // Delete client
-  async deleteClient(req: Request, res: Response) {
+  // Delete client - WITH RBAC
+  async deleteClient(req: AuthRequest, res: Response) {
     try {
       const { id } = req.params as unknown as ClientIdParams;
 
-      await clientService.deleteClient(id);
+      // Get user role from auth middleware for RBAC
+      const userRole = req.user!.role;
+
+      await clientService.deleteClient(id, userRole);
       successResponse(res, null, "Client deleted successfully");
     } catch (error: any) {
       if (error.message === "Client not found") {
         return notFoundResponse(res, "Client");
       }
+      if (error.message === "Access denied") {
+        return forbiddenResponse(res, "Access denied");
+      }
       errorResponse(res, "Failed to delete client", 500, error.message);
     }
   },
 
-  // Search clients
-  async searchClients(req: Request, res: Response) {
+  // Search clients - WITH RBAC
+  async searchClients(req: AuthRequest, res: Response) {
     try {
       const { q, status, lawyer, startDate, page, limit, sortBy, sortOrder } =
         req.query as unknown as ClientSearchInput;
@@ -164,12 +201,21 @@ export const clientController = {
         startDate: startDate ? new Date(startDate) : undefined,
       };
 
-      const result = await clientService.searchClients(filters, {
-        page,
-        limit,
-        sortBy,
-        sortOrder,
-      });
+      // Get user info from auth middleware for RBAC
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+
+      const result = await clientService.searchClients(
+        filters,
+        {
+          page,
+          limit,
+          sortBy,
+          sortOrder,
+        },
+        userRole,
+        userId
+      );
 
       paginatedResponse(
         res,
@@ -182,10 +228,17 @@ export const clientController = {
     }
   },
 
-  // Get client statistics
-  async getClientStatistics(req: Request, res: Response) {
+  // Get client statistics - WITH RBAC
+  async getClientStatistics(req: AuthRequest, res: Response) {
     try {
-      const statistics = await clientService.getClientStatistics();
+      // Get user info from auth middleware for RBAC
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+
+      const statistics = await clientService.getClientStatistics(
+        userRole,
+        userId
+      );
       successResponse(
         res,
         statistics,

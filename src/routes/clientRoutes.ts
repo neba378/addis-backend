@@ -8,8 +8,17 @@ import {
   clientIdParamsSchema,
 } from "../validations/client.validation";
 import { paginationSchema } from "../validations/note.validation";
+import {
+  authenticate,
+  authorize,
+  requireManagerOrSuperAdmin,
+  requireLawyer,
+} from "../middlewares/auth.middleware";
 
 const router = Router();
+
+// Apply authentication to all client routes
+router.use(authenticate);
 
 /**
  * @swagger
@@ -18,6 +27,8 @@ const router = Router();
  *     summary: Create a new client
  *     description: Create a new client with default folders. Case number is optional - system will generate a temporary one if not provided.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -27,7 +38,6 @@ const router = Router();
  *             required:
  *               - fullName
  *               - phoneNumber
- *               - createdBy
  *             properties:
  *               fullName:
  *                 type: string
@@ -35,9 +45,6 @@ const router = Router();
  *               phoneNumber:
  *                 type: string
  *                 example: "+1234567890"
- *               createdBy:
- *                 type: string
- *                 example: "admin"
  *               caseNumber:
  *                 type: string
  *                 example: "CASE-2024-001"
@@ -48,7 +55,7 @@ const router = Router();
  *                 example: "2024-01-15T10:30:00Z"
  *               assignedLawyer:
  *                 type: string
- *                 example: "Sarah Johnson"
+ *                 example: "lawyer-user-id"
  *               court:
  *                 type: string
  *                 example: "Federal Court"
@@ -75,18 +82,27 @@ const router = Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/", validate(createClientSchema), clientController.createClient);
+router.post(
+  "/",
+  validate(createClientSchema),
+  requireManagerOrSuperAdmin,
+  clientController.createClient
+);
 
 /**
  * @swagger
  * /clients:
  *   get:
  *     summary: Get all clients
- *     description: Retrieve paginated list of clients with optional filtering
+ *     description: Retrieve paginated list of clients with optional filtering. Lawyers can only see their assigned clients.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -155,6 +171,8 @@ router.post("/", validate(createClientSchema), clientController.createClient);
  *                         $ref: '#/components/schemas/ClientWithRelations'
  *                     pagination:
  *                       $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -165,8 +183,10 @@ router.get("/", validate(paginationSchema), clientController.getClients);
  * /clients/search:
  *   get:
  *     summary: Search clients
- *     description: Search clients with advanced filtering
+ *     description: Search clients with advanced filtering. Lawyers can only search their assigned clients.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: q
@@ -235,6 +255,8 @@ router.get("/", validate(paginationSchema), clientController.getClients);
  *                         $ref: '#/components/schemas/ClientWithRelations'
  *                     pagination:
  *                       $ref: '#/components/schemas/Pagination'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -249,8 +271,10 @@ router.get(
  * /clients/statistics:
  *   get:
  *     summary: Get client statistics
- *     description: Retrieve statistics about clients
+ *     description: Retrieve statistics about clients. Lawyers can only see statistics for their assigned clients.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successful operation
@@ -318,10 +342,16 @@ router.get(
  *                             type: string
  *                             format: date-time
  *                             example: "2024-01-15T10:30:00Z"
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/statistics", clientController.getClientStatistics);
+router.get(
+  "/statistics",
+  requireManagerOrSuperAdmin,
+  clientController.getClientStatistics
+);
 
 /**
  * @swagger
@@ -330,6 +360,8 @@ router.get("/statistics", clientController.getClientStatistics);
  *     summary: Check if case number exists
  *     description: Check if a case number is already in use
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: caseNumber
@@ -357,24 +389,32 @@ router.get("/statistics", clientController.getClientStatistics);
  *                       example: true
  *       400:
  *         description: Case number parameter is required
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/check-case-number", clientController.checkCaseNumberExists);
+router.get(
+  "/check-case-number",
+  requireManagerOrSuperAdmin,
+  clientController.checkCaseNumberExists
+);
 
 /**
  * @swagger
  * /clients/{id}:
  *   get:
  *     summary: Get client by ID
- *     description: Retrieve a specific client by ID with all relations (folders, notes, files)
+ *     description: Retrieve a specific client by ID with all relations (folders, notes, files). Lawyers can only access their assigned clients.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Client ID
  *     responses:
  *       200:
@@ -390,8 +430,12 @@ router.get("/check-case-number", clientController.checkCaseNumberExists);
  *                   type: string
  *                 data:
  *                   $ref: '#/components/schemas/ClientWithRelations'
+ *       403:
+ *         description: Access denied to this client
  *       404:
  *         $ref: '#/components/responses/NotFound'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -406,14 +450,16 @@ router.get(
  * /clients/{id}:
  *   put:
  *     summary: Update a client
- *     description: Update client information including case number
+ *     description: Update client information including case number. Lawyers can only update their assigned clients and cannot change assigned lawyer.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Client ID
  *     requestBody:
  *       required: true
@@ -437,7 +483,7 @@ router.get(
  *                 example: "2024-01-20T10:30:00Z"
  *               assignedLawyer:
  *                 type: string
- *                 example: "Michael Brown"
+ *                 example: "lawyer-user-id"
  *               court:
  *                 type: string
  *                 example: "Supreme Court"
@@ -460,12 +506,12 @@ router.get(
  *                   $ref: '#/components/schemas/ClientWithRelations'
  *       400:
  *         description: Case number already exists
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Error'
+ *       403:
+ *         description: Access denied or cannot change assigned lawyer
  *       404:
  *         $ref: '#/components/responses/NotFound'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -473,6 +519,7 @@ router.put(
   "/:id",
   validate(clientIdParamsSchema),
   validate(updateClientSchema),
+  requireManagerOrSuperAdmin,
   clientController.updateClient
 );
 
@@ -481,14 +528,16 @@ router.put(
  * /clients/{id}:
  *   delete:
  *     summary: Delete a client
- *     description: Delete a specific client by ID (cascades to folders, files, and notes)
+ *     description: Delete a specific client by ID (cascades to folders, files, and notes). Only managers and super admins can delete clients.
  *     tags: [Clients]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *         description: Client ID
  *     responses:
  *       200:
@@ -502,14 +551,20 @@ router.put(
  *                   type: boolean
  *                 message:
  *                   type: string
+ *       403:
+ *         description: Access denied - only managers and super admins can delete clients
  *       404:
  *         $ref: '#/components/responses/NotFound'
+ *       401:
+ *         description: Unauthorized
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
 router.delete(
   "/:id",
+  requireManagerOrSuperAdmin, // Only managers and super admins can delete
   validate(clientIdParamsSchema),
+  authenticate,
   clientController.deleteClient
 );
 
