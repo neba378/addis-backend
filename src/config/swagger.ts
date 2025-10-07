@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
         "Comprehensive API documentation for the Addis Digital Office Management System with Role-Based Access Control (RBAC)",
       contact: {
         name: "API Support",
-        email: "support@addisdigital.com",
+        email: "support@addisfirm.com",
       },
       license: {
         name: "MIT",
@@ -26,7 +26,7 @@ const options: swaggerJsdoc.Options = {
         description: "Development server",
       },
       {
-        url: "https://api.addisdigital.com/api",
+        url: "https://api.addisfirm.com",
         description: "Production server",
       },
     ],

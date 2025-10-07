@@ -33,9 +33,9 @@ app.use(
           "https://api.addisfirm.com",
           "http://localhost:3001",
           "http://localhost:5173",
-          "https://api.addisfirm.com/api-docs", // Add Swagger UI if needed
         ] // Replace with your production domain
       : [
+          "https://api.addisfirm.com",
           "http://localhost:3000",
           "http://localhost:3001",
           "http://localhost:5173",
@@ -47,28 +47,12 @@ app.use(
 );
 app.set("trust proxy", true);
 // Body parsing middleware
-app.use(express.json({ limit: env.upload.maxFileSize + "b" })); // Use your config
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json()); // Use your config
+app.use(express.urlencoded({ extended: true }));
 
 // Cookie parser middleware
 app.use(cookieParser(env.security.jwtSecret));
-
-// Serve static files (uploaded files) with proper headers
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    // More restrictive in production
-    if (isProduction()) {
-      res.header("Access-Control-Allow-Origin", "*");
-    } else {
-      res.header("Access-Control-Allow-Origin", "*");
-    }
-    res.header("Access-Control-Allow-Methods", "GET");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-  },
-  express.static(path.join(__dirname, "../uploads"))
-);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Health check endpoint with database connection check
 app.get("/health", async (_req, res) => {

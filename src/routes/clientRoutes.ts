@@ -87,7 +87,12 @@ router.use(authenticate);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/", validate(createClientSchema), clientController.createClient);
+router.post(
+  "/",
+  validate(createClientSchema),
+  requireManagerOrSuperAdmin,
+  clientController.createClient
+);
 
 /**
  * @swagger
@@ -342,7 +347,11 @@ router.get(
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/statistics", clientController.getClientStatistics);
+router.get(
+  "/statistics",
+  requireManagerOrSuperAdmin,
+  clientController.getClientStatistics
+);
 
 /**
  * @swagger
@@ -385,7 +394,11 @@ router.get("/statistics", clientController.getClientStatistics);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.get("/check-case-number", clientController.checkCaseNumberExists);
+router.get(
+  "/check-case-number",
+  requireManagerOrSuperAdmin,
+  clientController.checkCaseNumberExists
+);
 
 /**
  * @swagger
@@ -506,6 +519,7 @@ router.put(
   "/:id",
   validate(clientIdParamsSchema),
   validate(updateClientSchema),
+  requireManagerOrSuperAdmin,
   clientController.updateClient
 );
 
@@ -550,6 +564,7 @@ router.delete(
   "/:id",
   requireManagerOrSuperAdmin, // Only managers and super admins can delete
   validate(clientIdParamsSchema),
+  authenticate,
   clientController.deleteClient
 );
 

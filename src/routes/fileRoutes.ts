@@ -233,6 +233,7 @@ router.put(
   "/:id",
   validate(fileIdParamsSchema),
   validate(updateFileSchema),
+  requireManagerOrSuperAdmin,
   fileController.updateFile
 );
 

@@ -29,6 +29,9 @@ export const env = {
     port: parseInt(process.env["PORT"] || "5000"),
     nodeEnv: process.env["NODE_ENV"] || "development",
     apiPrefix: process.env["API_PREFIX"] || "/api",
+    name: process.env.APP_NAME || "Addis Digital Office Management",
+    url: process.env.APP_URL || "http://localhost:3000",
+    env: process.env.NODE_ENV || "development",
   },
 
   // File Upload
@@ -50,6 +53,13 @@ export const env = {
     jwtSecret:
       process.env["JWT_SECRET"] || "your-fallback-secret-change-in-production",
     bcryptRounds: parseInt(process.env["BCRYPT_ROUNDS"] || "12"),
+  },
+  email: {
+    host: process.env.EMAIL_HOST!,
+    port: parseInt(process.env.EMAIL_PORT || "587"),
+    user: process.env.EMAIL_USER!,
+    pass: process.env.EMAIL_PASS!,
+    from: process.env.EMAIL_FROM!,
   },
 };
 

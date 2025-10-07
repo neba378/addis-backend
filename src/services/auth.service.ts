@@ -128,9 +128,18 @@ export const authService = {
         status: Status.PENDING,
       },
     });
-
+    console.log(user);
     // Send invitation email
-    await emailService.sendInvitationEmail(email, name, tempPassword);
+    const emailSent = await emailService.sendInvitationEmail(
+      email,
+      name,
+      tempPassword
+    );
+    if (!emailSent) {
+      console.warn(
+        `⚠️ Failed to send invitation email to ${email}, but user was created`
+      );
+    }
 
     return {
       id: user.id,
@@ -138,7 +147,7 @@ export const authService = {
       name: user.name,
       role: user.role,
       status: user.status,
-      tempPassword, // Return temp password for reference (do not log in production)
+      tempPassword,
     };
   },
 
@@ -209,7 +218,14 @@ export const authService = {
     });
 
     // Send reset email
-    await emailService.sendPasswordResetEmail(email, user.name, resetToken);
+    const emailSent = await emailService.sendPasswordResetEmail(
+      email,
+      user.name,
+      resetToken
+    );
+    if (!emailSent) {
+      console.warn(`⚠️ Failed to send password reset email to ${email}`);
+    }
 
     return { message: "If the email exists, a reset link will be sent" };
   },
