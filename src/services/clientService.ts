@@ -34,7 +34,7 @@ export const clientService = {
     }
 
     // Use Prisma's exact type structure
-    const createData = {
+    const createData: any = {
       fullName: data.fullName,
       caseNumber: caseNumber,
       phoneNumber: data.phoneNumber,
@@ -45,12 +45,14 @@ export const clientService = {
       createdBy: data.createdBy,
       status: data.status || "Pending",
       notes: data.notes ?? null,
-      ...(data.assignedLawyerId && {
-        assignedLawyer: {
-          connect: { id: data.assignedLawyerId },
-        },
-      }),
     };
+
+    // Handle assigned lawyer connection
+    if (data.assignedLawyerId) {
+      createData.assignedLawyer = {
+        connect: { id: data.assignedLawyerId },
+      };
+    }
 
     // Create the client
     const client = await prisma.client.create({
