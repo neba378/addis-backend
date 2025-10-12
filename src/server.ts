@@ -16,7 +16,6 @@ import adminRoutes from "./routes/adminRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { env, isProduction } from "./config/env"; // Your enhanced env config
 import { setupSwagger } from "./config/swagger";
-import prisma from "./config/db"; // Your Prisma client
 import { superadminService } from "./services/superadmin.service";
 
 const app = express();
