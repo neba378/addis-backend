@@ -43,4 +43,4 @@ jobs:
           username: ${{ secrets.CPANEL_FTP_USERNAME }}
           password: ${{ secrets.CPANEL_FTP_PASSWORD }}
           local-dir: tmp/
-          server-dir: /path/to/your/app/tmp/
+          server-dir: /home/addisffc/addis-backend/tmp/
