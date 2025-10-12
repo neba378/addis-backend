@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.CPANEL_FTP_USERNAME }}
           password: ${{ secrets.CPANEL_FTP_PASSWORD }}
           local-dir: dist/
-          server-dir: /home/addisffc/addis-backend/dist
+          server-dir: /home/addisffc/addis-backend/dist/
           exclude: |
             **/node_modules/**
             **/.git*/**
