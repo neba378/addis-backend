@@ -30,7 +30,7 @@ export const clientController = {
         notes,
       } = req.body as CreateClientInput;
 
-      const createdBy = req.user!.id; // Get from authenticated user
+      const createdBy = req.user!.id;
 
       const client = await clientService.createClient({
         fullName,
