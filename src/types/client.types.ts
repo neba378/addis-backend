@@ -4,7 +4,7 @@ export interface CreateClientData {
   fullName: string;
   phoneNumber: string;
   appointmentDate?: Date | string | null | undefined;
-  assignedLawyer?: string | undefined;
+  assignedLawyerId?: string | undefined;
   court?: string | null | undefined;
   createdBy: string;
   status?: string | undefined;
@@ -16,7 +16,7 @@ export interface UpdateClientData {
   fullName?: string | undefined;
   phoneNumber?: string | undefined;
   appointmentDate?: Date | string | null | undefined;
-  assignedLawyer?: string | undefined;
+  assignedLawyerId?: string | undefined;
   court?: string | null | undefined;
   status?: string | undefined;
   caseNumber?: string | null | undefined; // Can be added/updated later

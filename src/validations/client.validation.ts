@@ -22,7 +22,7 @@ export const createClientSchema = z.object({
       .nullable()
       .transform((val) => (val ? new Date(val) : null)),
 
-    assignedLawyer: z
+    assignedLawyerId: z
       .string()
       .max(100, "Lawyer name must be less than 100 characters")
       .trim()

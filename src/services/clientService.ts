@@ -45,9 +45,9 @@ export const clientService = {
       createdBy: data.createdBy,
       status: data.status || "Pending",
       notes: data.notes ?? null,
-      ...(data.assignedLawyer && {
+      ...(data.assignedLawyerId && {
         assignedLawyer: {
-          connect: { id: data.assignedLawyer },
+          connect: { id: data.assignedLawyerId },
         },
       }),
     };
@@ -214,8 +214,8 @@ export const clientService = {
     // RBAC: Lawyers cannot change assigned lawyer
     if (
       userRole === UserRole.LAWYER &&
-      data.assignedLawyer &&
-      data.assignedLawyer !== existingClient.assignedLawyerId
+      data.assignedLawyerId &&
+      data.assignedLawyerId !== existingClient.assignedLawyerId
     ) {
       throw new Error("Cannot change assigned lawyer");
     }
@@ -250,13 +250,13 @@ export const clientService = {
     if (typeof data.status !== "undefined") updateData.status = data.status;
 
     // Handle assigned lawyer update (only for managers and super admins)
-    if (typeof data.assignedLawyer !== "undefined") {
-      if (data.assignedLawyer) {
-        updateData.assignedLawyer = {
-          connect: { id: data.assignedLawyer },
+    if (typeof data.assignedLawyerId !== "undefined") {
+      if (data.assignedLawyerId) {
+        updateData.assignedLawyerId = {
+          connect: { id: data.assignedLawyerId },
         };
       } else {
-        updateData.assignedLawyer = {
+        updateData.assignedLawyerId = {
           disconnect: true,
         };
       }
