@@ -125,7 +125,7 @@ export const clientController = {
         caseNumber,
         phoneNumber,
         appointmentDate,
-        assignedLawyer,
+        assignedLawyerId,
         court,
         status,
       } = req.body as UpdateClientInput;
@@ -142,7 +142,7 @@ export const clientController = {
           phoneNumber,
           appointmentDate,
           assignedLawyerId:
-            assignedLawyer === null ? undefined : assignedLawyer,
+            assignedLawyerId === null ? undefined : assignedLawyerId,
           court,
           status,
         },
