@@ -81,6 +81,11 @@ app.use("/api/files", fileRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/admin", adminRoutes);
 
+//test route for ci cd
+app.get("/cicd", (req, res) => {
+  res.send("CI CD is working fine");
+});
+
 // Keep your existing routes if needed, or remove them
 app.use("/api/auth", authRoutes); // Keep if you need authentication
 
