@@ -49,11 +49,11 @@ export const clientService = {
 
     // Handle assigned lawyer connection
     if (data.assignedLawyerId) {
-      createData.assignedLawyer = {
+      createData.assignedLawyerId = {
         connect: { id: data.assignedLawyerId },
       };
     }
-
+    // Else, leave it undefined (no lawyer assigned)
     // Create the client
     const client = await prisma.client.create({
       data: createData,
