@@ -49,7 +49,7 @@ export const clientService = {
 
     // Handle assigned lawyer connection
     if (data.assignedLawyerId) {
-      createData.assignedLawyerId = {
+      createData.assignedLawyer = {
         connect: { id: data.assignedLawyerId },
       };
     }
