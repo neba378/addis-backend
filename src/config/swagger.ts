@@ -1327,7 +1327,8 @@ const options: swaggerJsdoc.Options = {
       },
       {
         name: "Appointments",
-        description: "Appointment management endpoints with calendar view",
+        description:
+          "Appointment management related endpoints with calendar view",
       },
       {
         name: "Notes",
