@@ -16,12 +16,12 @@ import appointmentRoutes from "./routes/appointmentRoutes";
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
 import { env, isProduction } from "./config/env"; // Your enhanced env config
-import { setupSwagger } from "./config/swagger";
+// import { setupSwagger } from "./config/swagger";
 import { superadminService } from "./services/superadmin.service";
 
 const app = express();
 const PORT = env.app.port;
-setupSwagger(app);
+// setupSwagger(app);
 // Security middleware
 app.use(helmet());
 
