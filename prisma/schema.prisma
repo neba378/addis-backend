@@ -9,19 +9,20 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
-  email       String    @unique
+  email       String        @unique
   password    String
-  role        UserRole  @default(LAWYER)
-  status      Status    @default(PENDING)
+  role        UserRole      @default(LAWYER)
+  status      Status        @default(PENDING)
   department  String?
   phoneNumber String?
   lastLogin   DateTime?
-  joinedAt    DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  joinedAt    DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   Client      Client[]
+  Appointment Appointment[]
 
   @@map("users")
 }
@@ -128,9 +129,10 @@ model Client {
   updatedAt        DateTime  @updatedAt
 
   // Relations
-  assignedLawyer User?    @relation(fields: [assignedLawyerId], references: [id])
+  assignedLawyer User?         @relation(fields: [assignedLawyerId], references: [id])
   folders        Folder[]
   clientNotes    Note[]
+  Appointment    Appointment[]
 
   @@map("clients")
 }
@@ -196,4 +198,24 @@ model NoteFile {
   note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
 
   @@map("note_files")
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?  @db.Text
+  status          String   @default("upcoming")
+  location        String?
+  appointmentWith String
+  caseId          String // This references Client.id
+  userId          String // This references User.id (lawyer who created the appointment)
+  date            DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  client Client @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("appointments")
 }

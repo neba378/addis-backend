@@ -11,6 +11,7 @@ import fileRoutes from "./routes/fileRoutes";
 import noteRoutes from "./routes/noteRoutes";
 import authRoutes from "./routes/auth.routes";
 import adminRoutes from "./routes/adminRoutes";
+import appointmentRoutes from "./routes/appointmentRoutes";
 
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
@@ -80,6 +81,7 @@ app.use("/api/folders", folderRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/notes", noteRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/appointments", appointmentRoutes);
 
 //test route for ci cd
 app.get("/cicd", (req, res) => {
