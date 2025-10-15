@@ -17,34 +17,19 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
+      - name: Install and Build
         run: |
           npm ci
-
-      - name: Create environment file for database migration
-        run: |
-          # Create .env file with the actual database URL from secrets
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
-          echo "NODE_ENV=production" >> .env
-          echo "APP_PORT=3000" >> .env
-
-      - name: Generate Prisma client and run migration
-        run: |
           npx prisma generate
-          npx prisma db push --skip-generate
-
-      - name: Build application
-        run: |
           npm run build
+          # Create tmp directory for restart trigger
+          mkdir -p tmp
+          echo "restart-$(date +%s)" > tmp/restart.txt
 
-      - name: Clean up sensitive files before deployment
+      - name: Debug - Verify build output
         run: |
-          # Remove the .env file to avoid deploying it with database credentials
-          rm -f .env
-          # Create a safe .env template for production (without actual credentials)
-          echo "DATABASE_URL=to_be_configured_on_server" > .env.production
-          echo "NODE_ENV=production" >> .env.production
-          echo "APP_PORT=3000" >> .env.production
+          echo "=== Checking build output ==="
+          ls -la dist/ || echo "Dist directory not found"
 
       - name: Deploy build files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
@@ -52,26 +37,18 @@ jobs:
           server: ${{ secrets.CPANEL_FTP_SERVER }}
           username: ${{ secrets.CPANEL_FTP_USERNAME }}
           password: ${{ secrets.CPANEL_FTP_PASSWORD }}
-          local-dir: ./
-          server-dir: ./
+          local-dir: ./dist/
+          server-dir: ./dist/ # Use relative path from FTP root
           exclude: |
             **/node_modules/**
             **/.git*
             **/.github/*
-            **/src/
-            **/prisma/migrations/
-            README.md
 
-      - name: Create restart trigger
-        run: |
-          mkdir -p tmp
-          echo "restart-$(date +%s)" > tmp/restart.txt
-
-      - name: Upload restart trigger
+      - name: Trigger restart via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.CPANEL_FTP_SERVER }}
           username: ${{ secrets.CPANEL_FTP_USERNAME }}
           password: ${{ secrets.CPANEL_FTP_PASSWORD }}
           local-dir: ./tmp/
-          server-dir: ./tmp/
+          server-dir: ./tmp/ # Use relative path from FTP root
