@@ -1343,7 +1343,7 @@ const options: swaggerJsdoc.Options = {
       },
       {
         name: "Arbitration",
-        description: "Arbitration based case management endpoints",
+        description: "Arbitration case management endpoints",
       },
       {
         name: "Admin",
