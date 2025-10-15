@@ -100,6 +100,330 @@ const options: swaggerJsdoc.Options = {
           },
         },
 
+        // Appointment Schemas
+        Appointment: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              description: "Appointment ID",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            title: {
+              type: "string",
+              description: "Appointment title",
+              example: "Real Estate Closing - Parker Property",
+              maxLength: 255,
+            },
+            description: {
+              type: "string",
+              description: "Appointment description",
+              example: "Final closing for commercial property sale",
+              nullable: true,
+            },
+            status: {
+              type: "string",
+              enum: ["upcoming", "expired", "canceled", "completed"],
+              description: "Appointment status",
+              example: "upcoming",
+              default: "upcoming",
+            },
+            location: {
+              type: "string",
+              description: "Appointment location",
+              example: "Federal Court - Main Building 4killo",
+              nullable: true,
+            },
+            appointmentWith: {
+              type: "string",
+              enum: ["court", "client", "both"],
+              description: "Type of appointment",
+              example: "both",
+            },
+            caseId: {
+              type: "string",
+              description: "Client/Case ID",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            userId: {
+              type: "string",
+              description: "User who created the appointment",
+              example: "clabc123def456ghi789jkl012",
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              description: "Appointment date and time",
+              example: "2025-01-15T10:00:00Z",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              description: "Appointment creation timestamp",
+              example: "2024-01-15T10:30:00Z",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              description: "Appointment last update timestamp",
+              example: "2024-01-15T10:30:00Z",
+            },
+          },
+        },
+
+        AppointmentWithRelations: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            title: {
+              type: "string",
+              example: "Real Estate Closing - Parker Property",
+            },
+            description: {
+              type: "string",
+              example: "Final closing for commercial property sale",
+              nullable: true,
+            },
+            status: {
+              type: "string",
+              example: "upcoming",
+            },
+            location: {
+              type: "string",
+              example: "Federal Court - Main Building 4killo",
+              nullable: true,
+            },
+            appointmentWith: {
+              type: "string",
+              example: "both",
+            },
+            caseId: {
+              type: "string",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            userId: {
+              type: "string",
+              example: "clabc123def456ghi789jkl012",
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              example: "2025-01-15T10:00:00Z",
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-15T10:30:00Z",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-01-15T10:30:00Z",
+            },
+            client: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  example: "123e4567-e89b-12d3-a456-426614174000",
+                },
+                fullName: {
+                  type: "string",
+                  example: "John Doe",
+                },
+                caseNumber: {
+                  type: "string",
+                  example: "CASE-2024-001",
+                },
+                phoneNumber: {
+                  type: "string",
+                  example: "+1234567890",
+                },
+              },
+            },
+            user: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "string",
+                  example: "clabc123def456ghi789jkl012",
+                },
+                name: {
+                  type: "string",
+                  example: "Sarah Johnson",
+                },
+                email: {
+                  type: "string",
+                  example: "sarah.johnson@example.com",
+                },
+                role: {
+                  type: "string",
+                  example: "LAWYER",
+                },
+              },
+            },
+          },
+        },
+
+        CreateAppointmentInput: {
+          type: "object",
+          required: ["title", "appointmentWith", "caseId", "date"],
+          properties: {
+            title: {
+              type: "string",
+              description: "Appointment title",
+              example: "Real Estate Closing - Parker Property",
+              maxLength: 255,
+            },
+            description: {
+              type: "string",
+              description: "Appointment description",
+              example: "Final closing for commercial property sale",
+              nullable: true,
+            },
+            status: {
+              type: "string",
+              enum: ["upcoming", "expired", "canceled", "completed"],
+              description: "Appointment status",
+              example: "upcoming",
+              default: "upcoming",
+            },
+            location: {
+              type: "string",
+              description: "Appointment location",
+              example: "Federal Court - Main Building 4killo",
+              nullable: true,
+            },
+            appointmentWith: {
+              type: "string",
+              enum: ["court", "client", "both"],
+              description: "Type of appointment",
+              example: "both",
+            },
+            caseId: {
+              type: "string",
+              description: "Client/Case ID",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              description: "Appointment date and time",
+              example: "2025-01-15T10:00:00Z",
+            },
+          },
+        },
+
+        UpdateAppointmentInput: {
+          type: "object",
+          properties: {
+            title: {
+              type: "string",
+              description: "Appointment title",
+              example: "Updated Appointment Title",
+              maxLength: 255,
+              nullable: true,
+            },
+            description: {
+              type: "string",
+              description: "Appointment description",
+              example: "Updated description",
+              nullable: true,
+            },
+            status: {
+              type: "string",
+              enum: ["upcoming", "expired", "canceled", "completed"],
+              description: "Appointment status",
+              example: "completed",
+              nullable: true,
+            },
+            location: {
+              type: "string",
+              description: "Appointment location",
+              example: "New Location",
+              nullable: true,
+            },
+            appointmentWith: {
+              type: "string",
+              enum: ["court", "client", "both"],
+              description: "Type of appointment",
+              example: "client",
+              nullable: true,
+            },
+            caseId: {
+              type: "string",
+              description: "Client/Case ID",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+              nullable: true,
+            },
+            date: {
+              type: "string",
+              format: "date-time",
+              description: "Appointment date and time",
+              example: "2025-01-20T14:00:00Z",
+              nullable: true,
+            },
+          },
+        },
+
+        UpdateAppointmentStatusInput: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: {
+              type: "string",
+              enum: ["upcoming", "expired", "canceled", "completed"],
+              description: "New appointment status",
+              example: "completed",
+            },
+          },
+        },
+
+        CalendarViewResponse: {
+          type: "object",
+          properties: {
+            "2025-01-15": {
+              type: "array",
+              items: {
+                $ref: "#/components/schemas/AppointmentWithRelations",
+              },
+              description: "Appointments grouped by date",
+            },
+          },
+          example: {
+            "2025-01-15": [
+              {
+                id: "123e4567-e89b-12d3-a456-426614174000",
+                title: "Real Estate Closing - Parker Property",
+                description: "Final closing for commercial property sale",
+                status: "upcoming",
+                location: "Federal Court - Main Building 4killo",
+                appointmentWith: "both",
+                caseId: "123e4567-e89b-12d3-a456-426614174000",
+                userId: "clabc123def456ghi789jkl012",
+                date: "2025-01-15T10:00:00Z",
+                createdAt: "2024-01-15T10:30:00Z",
+                updatedAt: "2024-01-15T10:30:00Z",
+                client: {
+                  id: "123e4567-e89b-12d3-a456-426614174000",
+                  fullName: "John Doe",
+                  caseNumber: "CASE-2024-001",
+                  phoneNumber: "+1234567890",
+                },
+                user: {
+                  id: "clabc123def456ghi789jkl012",
+                  name: "Sarah Johnson",
+                  email: "sarah.johnson@example.com",
+                  role: "LAWYER",
+                },
+              },
+            ],
+          },
+        },
+
         AuthTokens: {
           type: "object",
           properties: {
@@ -939,6 +1263,52 @@ const options: swaggerJsdoc.Options = {
           },
           description: "Sort order",
         },
+        AppointmentStartDate: {
+          in: "query",
+          name: "startDate",
+          schema: {
+            type: "string",
+            format: "date-time",
+          },
+          description:
+            "Start date for filtering appointments (defaults to last month)",
+        },
+        AppointmentEndDate: {
+          in: "query",
+          name: "endDate",
+          schema: {
+            type: "string",
+            format: "date-time",
+          },
+          description: "End date for filtering appointments",
+        },
+        AppointmentStatus: {
+          in: "query",
+          name: "status",
+          schema: {
+            type: "string",
+            enum: ["upcoming", "expired", "canceled", "completed"],
+          },
+          description: "Filter appointments by status",
+        },
+        AppointmentWith: {
+          in: "query",
+          name: "appointmentWith",
+          schema: {
+            type: "string",
+            enum: ["court", "client", "both"],
+          },
+          description: "Filter appointments by type",
+        },
+        CaseId: {
+          in: "query",
+          name: "caseId",
+          schema: {
+            type: "string",
+            format: "uuid",
+          },
+          description: "Filter appointments by client/case ID",
+        },
       },
     },
     tags: [
@@ -954,6 +1324,10 @@ const options: swaggerJsdoc.Options = {
         name: "Clients",
         description:
           "Client management endpoints with role-based access control",
+      },
+      {
+        name: "Appointments",
+        description: "Appointment management endpoints with calendar view",
       },
       {
         name: "Notes",
