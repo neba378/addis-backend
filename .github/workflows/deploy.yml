@@ -18,13 +18,11 @@ jobs:
           node-version: 22
 
       - name: Install and Build
-
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           npm ci
           npx prisma generate
           npm run build
+          # Create tmp directory for restart trigger
           mkdir -p tmp
           echo "restart-$(date +%s)" > tmp/restart.txt
 
@@ -42,6 +40,7 @@ jobs:
           local-dir: ./dist/
           server-dir: ./dist/ # Use relative path from FTP root
           exclude: |
+            **/node_modules/**
             **/.git*
             **/.github/*
 
