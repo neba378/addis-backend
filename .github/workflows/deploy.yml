@@ -40,7 +40,6 @@ jobs:
           local-dir: ./dist/
           server-dir: ./dist/ # Use relative path from FTP root
           exclude: |
-            **/node_modules/**
             **/.git*
             **/.github/*
 
