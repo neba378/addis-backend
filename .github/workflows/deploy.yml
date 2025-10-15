@@ -20,27 +20,33 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npx prisma generate
 
-      - name: Create production environment file
+      - name: Create environment file for database migration
         run: |
-          # Create .env file with production database URL
-          cat > .env << EOF
-          DATABASE_URL="${{ secrets.DATABASE_URL }}"
-          NODE_ENV=production
-          APP_PORT=3000
-          EOF
+          # Create .env file with the actual database URL from secrets
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > .env
+          echo "NODE_ENV=production" >> .env
+          echo "APP_PORT=3000" >> .env
+
+      - name: Generate Prisma client and run migration
+        run: |
+          npx prisma generate
+          npx prisma db push --skip-generate
 
       - name: Build application
         run: |
           npm run build
 
-      - name: Run database migration locally
+      - name: Clean up sensitive files before deployment
         run: |
-          # Run the migration locally before deploying
-          npx prisma db push --skip-generate
+          # Remove the .env file to avoid deploying it with database credentials
+          rm -f .env
+          # Create a safe .env template for production (without actual credentials)
+          echo "DATABASE_URL=to_be_configured_on_server" > .env.production
+          echo "NODE_ENV=production" >> .env.production
+          echo "APP_PORT=3000" >> .env.production
 
-      - name: Deploy all files via FTP
+      - name: Deploy build files via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.CPANEL_FTP_SERVER }}
@@ -53,9 +59,10 @@ jobs:
             **/.git*
             **/.github/*
             **/src/
+            **/prisma/migrations/
             README.md
 
-      - name: Create and upload restart trigger
+      - name: Create restart trigger
         run: |
           mkdir -p tmp
           echo "restart-$(date +%s)" > tmp/restart.txt
