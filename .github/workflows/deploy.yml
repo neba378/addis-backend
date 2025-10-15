@@ -52,11 +52,12 @@ jobs:
           local-dir: ./tmp/
           server-dir: ./tmp/ # Use relative path from FTP root
 
-      - name: Deploy node modules via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
-        with:
-          server: ${{ secrets.CPANEL_FTP_SERVER }}
-          username: ${{ secrets.CPANEL_FTP_USERNAME }}
-          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
-          local-dir: ./node_modules/
-          server-dir: ./node_modules/ # Use relative path from FTP root
+
+      # - name: Deploy node modules via FTP
+      #   uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+      #   with:
+      #     server: ${{ secrets.CPANEL_FTP_SERVER }}
+      #     username: ${{ secrets.CPANEL_FTP_USERNAME }}
+      #     password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+      #     local-dir: ./node_modules/
+      #     server-dir: ./node_modules/ # Use relative path from FTP root
