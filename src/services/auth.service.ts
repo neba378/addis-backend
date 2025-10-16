@@ -360,17 +360,7 @@ export const authService = {
 
   // Get all users (for managers and super admins)
   async getAllUsers(requesterRole: UserRole) {
-    let whereCondition = {};
-
-    // Managers can only see lawyers, super admins can see everyone
-    if (requesterRole === UserRole.MANAGER) {
-      whereCondition = {
-        role: UserRole.LAWYER,
-      };
-    }
-
     const users = await prisma.user.findMany({
-      where: whereCondition,
       select: {
         id: true,
         name: true,

@@ -41,9 +41,13 @@ export const authController = {
       // Check permissions
       if (
         req.user!.role === UserRole.MANAGER &&
-        data.role !== UserRole.LAWYER
+        data.role === UserRole.SUPER_ADMIN
       ) {
-        return errorResponse(res, "Managers can only invite lawyers", 403);
+        return errorResponse(
+          res,
+          "Managers can only invite lawyers and managers only",
+          403
+        );
       }
 
       const user = await authService.inviteUser(inviterId, data);
