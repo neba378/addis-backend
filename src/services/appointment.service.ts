@@ -426,6 +426,36 @@ export class AppointmentService {
 
     return appointments;
   }
+  // Get all appointments by caseId for managers/admins
+  async getAllAppointmentsByCaseId(caseId: string, userId: string) {
+    return await prisma.appointment.findMany({
+      where: {
+        caseId,
+        userId, // User's appointments only
+      },
+      include: {
+        client: {
+          select: {
+            id: true,
+            fullName: true,
+            caseNumber: true,
+            phoneNumber: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+  }
 }
 
 export const appointmentService = new AppointmentService();

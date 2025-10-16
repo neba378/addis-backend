@@ -387,4 +387,34 @@ router.patch("/:id/status", appointmentController.updateAppointmentStatus);
  */
 router.get("/admin/all", appointmentController.getAllAppointments);
 
+/**
+ * @swagger
+ * /api/appointments/case/{caseId}:
+ *   get:
+ *     summary: Get appointments by case ID (Managers and Admins only)
+ *    tags: [Appointments]
+ *    security:
+ *     - bearerAuth: []
+ *   parameters:
+ *    - in: path
+ *    name: caseId
+ *    required: true
+ *
+ *   schema:
+ *    type: string
+ *   format: uuid
+ *  description: Case ID to filter by
+ *    responses:
+ *    200:
+ *    description: List of appointments for the specified case ID
+ *  400:
+ *   description: Missing caseId
+ * 401:
+ *  description: Unauthorized
+ * 403:
+ * description: Forbidden - Insufficient permissions
+ *
+ */
+router.get("/case/:caseId", appointmentController.getAllAppointmentsByCaseId);
+
 export default router;

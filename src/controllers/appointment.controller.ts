@@ -277,4 +277,35 @@ export const appointmentController = {
       );
     }
   },
+
+  async getAllAppointmentsByCaseId(req: AuthRequest, res: Response) {
+    try {
+      const { caseId } = req.params;
+      if (!caseId) {
+        return errorResponse(res, "Case ID is required", 400);
+      }
+      const userRole = req.user!.role;
+      const userId = req.user!.id;
+      if (!["MANAGER", "SUPER_ADMIN"].includes(userRole)) {
+        return errorResponse(res, "Insufficient permissions", 403);
+      }
+      const appointments = await appointmentService.getAllAppointmentsByCaseId(
+        caseId,
+        userId
+      );
+
+      successResponse(
+        res,
+        appointments,
+        "All appointments for the case retrieved successfully"
+      );
+    } catch (error: any) {
+      errorResponse(
+        res,
+        "Failed to retrieve all appointments for the case",
+        500,
+        error.message
+      );
+    }
+  },
 };
