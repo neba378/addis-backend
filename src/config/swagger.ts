@@ -1,7 +1,7 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
-import { env } from "./env";
+import { env, isProduction } from "./env";
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -22,12 +22,12 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://localhost:${env.app.port}/api`,
-        description: "Development server",
-      },
-      {
-        url: "https://api.addisfirm.com",
-        description: "Production server",
+        url: isProduction()
+          ? "https://api.addisfirm.com/api"
+          : `http://localhost:${env.app.port}/api`,
+        description: isProduction()
+          ? "Production server"
+          : "Development server",
       },
     ],
     components: {
@@ -1357,7 +1357,17 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts", "./src/controllers/*.ts"], // Path to the API docs
+  apis: isProduction()
+    ? [
+        "./dist/routes/*.js",
+        "./dist/modules/**/routes/*.js",
+        "./dist/controllers/*.js",
+      ]
+    : [
+        "./src/routes/*.ts",
+        "./src/modules/**/routes/*.ts",
+        "./src/controllers/*.ts",
+      ], // Path to the API docs
 };
 
 const specs = swaggerJsdoc(options);
