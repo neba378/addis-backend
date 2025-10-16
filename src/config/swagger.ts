@@ -1,6 +1,4 @@
 import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
-import { Express } from "express";
 import { env, isProduction } from "./env";
 
 const options: swaggerJsdoc.Options = {
@@ -1370,28 +1368,4 @@ const options: swaggerJsdoc.Options = {
       ], // Path to the API docs
 };
 
-const specs = swaggerJsdoc(options);
-
-export const setupSwagger = (app: Express): void => {
-  app.use(
-    "/api-docs",
-    swaggerUi.serve,
-    swaggerUi.setup(specs, {
-      explorer: true,
-      customCss: `
-        .swagger-ui .topbar { display: none }
-        .swagger-ui .info .title { color: #2563eb }
-        .swagger-ui .btn.authorize { background-color: #2563eb; border-color: #2563eb }
-      `,
-      customSiteTitle: "Addis Digital API Documentation",
-      swaggerOptions: {
-        persistAuthorization: true,
-        displayRequestDuration: true,
-        docExpansion: "none",
-        filter: true,
-        showExtensions: true,
-        showCommonExtensions: true,
-      },
-    })
-  );
-};
+export const specs = swaggerJsdoc(options);

@@ -1,3 +1,4 @@
+import swaggerUi from "swagger-ui-express";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -16,12 +17,35 @@ import appointmentRoutes from "./routes/appointmentRoutes";
 // Import middleware and utilities
 import { errorHandler } from "./middlewares/errorHandler";
 import { env, isProduction } from "./config/env"; // Your enhanced env config
-import { setupSwagger } from "./config/swagger";
 import { superadminService } from "./services/superadmin.service";
+import { specs } from "./config/swagger";
 
 const app = express();
 const PORT = env.app.port;
-setupSwagger(app);
+
+// Setup Swagger for API documentation
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(specs, {
+    explorer: true,
+    customCss: `
+        .swagger-ui .topbar { display: none }
+        .swagger-ui .info .title { color: #2563eb }
+        .swagger-ui .btn.authorize { background-color: #2563eb; border-color: #2563eb }
+      `,
+    customSiteTitle: "Addis Digital API Documentation",
+    swaggerOptions: {
+      persistAuthorization: true,
+      displayRequestDuration: true,
+      docExpansion: "none",
+      filter: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+    },
+  })
+);
+
 // Security middleware
 app.use(helmet());
 
